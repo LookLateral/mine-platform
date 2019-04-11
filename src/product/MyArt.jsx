@@ -1,7 +1,7 @@
-import React, {Component} from 'react'
+import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles';
-import {Redirect, Link} from 'react-router-dom'
+import { Redirect, Link } from 'react-router-dom'
 //import {read} from './api-shop.js'
 //import {listByShop} from './../product/api-product.js'
 import Products from './Products'
@@ -28,15 +28,15 @@ const styles = theme => ({
     marginTop: theme.spacing.unit,
     color: theme.palette.openTitle
   },
-  addButton:{
-    float:'right',
+  addButton: {
+    float: 'right',
     marginRight: "40px"
   },
   leftIcon: {
     marginRight: "8px"
   },
   productTitle: {
-    padding:`${theme.spacing.unit * 3}px ${theme.spacing.unit * 2.5}px ${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
+    padding: `${theme.spacing.unit * 3}px ${theme.spacing.unit * 2.5}px ${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
     color: theme.palette.openTitle,
     width: '100%',
     fontSize: '1.2em'
@@ -48,24 +48,35 @@ const styles = theme => ({
 })
 
 class MyArt extends Component {
-  constructor({match}) {
+  constructor({ match }) {
     super()
     this.state = {
-      shop: '',
-      products:[]
+      products: [],
+      error: '',
     }
-    this.match = match
+    //this.match = match
+  }
+
+  loadProducts = async () => {
+    console.log('getting user artworks in my-art');
+    const data = await API.getByUser('artworksAPI', '/artworks/user', this.props.userState.userId);
+    if (data.error) {
+      this.setState({ error: data.error })
+    } else {
+      this.setState({ products: data })
+    }
   }
 
   componentDidMount() {
-    if (!this.props.userState.userLogged) {
-      return <Redirect to='/signin'/>
+    if (!this.props.userState.userLogged) { 
+      return <Redirect to='/signin' />
     }
+    this.loadProducts()
   }
 
   render() {
-    
-    const {classes/*, userState*/} = this.props
+
+    const { classes/*, userState*/ } = this.props
 
     return (
       <div className={classes.root}>
@@ -76,14 +87,14 @@ class MyArt extends Component {
                 The art I own
                 <span className={classes.addButton}>
                   <Link to={"/product/new"}>
-                    <Button color="primary" variant="raised">
+                    <Button color="primary" variant="contained">
                       Upload Artwork
                     </Button>
                   </Link>
-                </span>  
+                </span>
               </Typography>
               <div className={classes.divider}></div>
-              <Products products={ this.state.products } searched={false}/>
+              <Products products={this.state.products} searched={false} />
             </Card>
           </Grid>
         </Grid>

@@ -70,7 +70,7 @@ class AppRoutes extends React.Component {
       occupation:null,    
       
       // useful stuff
-      idGallery: false,
+      galleryId: false,
       artworks: [],
       categories: [],
       viewport: { width: 0, height: 0, },
@@ -152,7 +152,7 @@ class AppRoutes extends React.Component {
     const response = await API.get('galleriesAPI', '/galleries/' + this.state.email);  
     if(!isEmpty(response)){       
       this.setState({   
-        idGallery: response[0].id  
+        galleryId: response[0].id  
       },  function () {         
         //this.loadArtworks().then( response => { return response; });
         return true
@@ -188,7 +188,7 @@ class AppRoutes extends React.Component {
       occupation:null,   
 
       sidebarOpened: false, 
-      idGallery: false,
+      galleryId: false,
       artworks: [],
 
     }, function () {
@@ -203,7 +203,7 @@ class AppRoutes extends React.Component {
       //let holdingDays = Math.floor( (Date.parse(Date('Y-m-d')) - Date.parse(response[0].investDate)) / (1000 * 60 * 60 * 24));
       //let llScore = response[0].llToken * holdingDays;    
       this.setState({   
-        userId: response[0] || null,
+        userId: response[0].id || null,
         //email:response[0].email, 
         pswLogin: response[0].pswLogin,          
         
@@ -254,7 +254,6 @@ class AppRoutes extends React.Component {
       alert('Please complete all required fields'); 
       return false;
     } else {              
-      //ZUNOTE: check if is first reg or the complete one
       const userFullyRegistered = this.state.registrationDate !== null && this.state.userLoaded
       const userId = userFullyRegistered ? this.state.userId : null
       // ZUNOTE: create keys and fix here!!!
@@ -296,7 +295,7 @@ class AppRoutes extends React.Component {
 
       }, function () { 
         console.log("Registration response:\n" + JSON.stringify(response));
-        if(userFullyRegistered && this.state.idGallery){ //gallery already created
+        if(userFullyRegistered && this.state.galleryId){ //gallery already created
           console.log("no need to load gallery, it's the fully registration");
           if(userFullyRegistered && this.state.userLogged) this.props.history.push('/profile'); 
           else this.props.history.push('/signin'); 
@@ -444,17 +443,17 @@ class AppRoutes extends React.Component {
             <Route exact path="/fimart" render={(props) => <Fimart userState={this.state} {...props} /> } />
             
 
-            <Route exact path="/profile" render={(props) => <Profile userState={this.state} {...props} /> } />
-            <Route exact path="/user/edit" render={(props) => <EditProfile 
+            <Route exact path="/users/:userId" render={(props) => <Profile userState={this.state} {...props} /> } />
+            <Route exact path="/users/:userId/edit" render={(props) => <EditProfile 
                                                               userState={this.state} 
                                                               handleChangeTextField={this.handleChangeTextField}
                                                               handleRegistrationSubmit={this.handleRegistrationSubmit}
                                                               {...props} /> } />
-            <Route exact path="/profile/financials" render={(props) => <MyFinancials userState={this.state} {...props} /> } />
+            <Route exact path="/users/:userId/financials" render={(props) => <MyFinancials userState={this.state} {...props} /> } />
             {/*<Route path="/shops/:shopId" component={Shop}/>
             <PrivateRoute path="/seller/shops" component={MyShops}/>
             <PrivateRoute path="/seller/shop/new" component={NewShop}/>*/}
-            <Route exact path="/my-art" render={(props) => <MyArt userState={this.state} {...props} /> } />
+            <Route exact path="/users/:userId/:galleryId" render={(props) => <MyArt userState={this.state} {...props} /> } />
             
     
             {/* deprecated - to keep for imamu file-loader <Route path="/upload-artwork" exact render={(props) => <UploadArtwork userState={this.state} {...props} /> } />*/}
@@ -469,6 +468,7 @@ class AppRoutes extends React.Component {
           </Switch>
 
           <Sidebar 
+                    userId={this.state.userId}
                     isOpen={this.state.sidebarOpened}
                     userLogged={ this.state.userLogged} 
                     firstName={ this.state.firstName} 

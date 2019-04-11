@@ -194,7 +194,7 @@ const TextFields = (props) => {
                     <FormControl className={classes.selectOp}><InputLabel>Country of Residence</InputLabel>
                     <Select
                       native
-                      value={userState.countryResidence}
+                      value={userState.countryResidence || ""}
                       onChange={handleChangeTextField('countryResidence')}
                       inputProps={{
                         name: 'countryResidence',
@@ -446,7 +446,7 @@ const TextFields = (props) => {
                     <FormControl className={classes.selectOp}><InputLabel>Country of Citizenship</InputLabel>
                     <Select
                       native
-                      value={userState.countryCitizenship}
+                      value={userState.countryCitizenship || ""}
                       onChange={handleChangeTextField('countryCitizenship')}
                       inputProps={{
                         name: 'countryCitizenship',

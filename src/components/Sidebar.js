@@ -28,7 +28,7 @@ const Sidebar = (props) => {
 
                 <SidebarFastLinks userLogged={ props.userLogged} />
 
-                <SidebarLinkList userLogged={ props.userLogged} userType={ props.userType} />
+                <SidebarLinkList userLogged={ props.userLogged} userType={ props.userType} userId={ props.userId} />
 
         </div> :
         null

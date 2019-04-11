@@ -30,7 +30,7 @@ const SidebarLinkList = (props) => {
                         icon="home" />*/}
                     <SidebarSingleLink 
                         name="Member Dashboard"
-                        linkto="/profile"
+                        linkto={"/users/" + props.userId}
                         icon="address-card" />
                     <SidebarSingleLink 
                         name="Discover Art"

@@ -50,6 +50,8 @@ class NewProduct extends Component {
   constructor({match}) {
     super()
     this.state = {
+      id: '',
+      userId: '',
       name: '',
       artist: '',
       description: '',
@@ -57,6 +59,14 @@ class NewProduct extends Component {
       category: '',
       quantity: '',
       price: '',
+      creationDate: '',
+
+      viewable: false,
+      tagged: false,
+      tokenized: false,
+      onSale: false,
+      buyback: false,
+
       redirect: false,
       error: ''
     }
@@ -101,10 +111,68 @@ class NewProduct extends Component {
     })*/
   }
 
+  handleCreateArtworkSubmit = (e) => {
+    e.preventDefault();
+    this.createArtwork();
+    console.log('posting artwork');
+  }
+  
+  createArtwork = async () => {
+    if(this.state.name===null || this.state.artist===null){
+      alert('Please complete all required fields'); 
+      return false;
+    } else {              
+      const response = await API.post('artworksAPI', '/artworks/', {
+        body: {
+          id: null,
+          userId: this.props.userState.userId,
+          name: this.state.name,
+          artist: this.state.artist,
+          description: this.state.description,
+          images: [],
+          category: this.state.category,
+          quantity: this.state.quantity,
+          price: this.state.price,
+          creationDate: Date('Y-m-d'),
+          
+          viewable: false,
+          tagged: false,
+          tokenized: false,
+          onSale: false,
+          buyback: false,
+          
+        }
+      });      
+
+      this.setState({
+        userRegistered: true, 
+        userFullyRegistered: userFullyRegistered,
+        registrationDate: userFullyRegistered ? this.state.registrationDate : Date('Y-m-d'), 
+        registrationDateUpdate: Date('Y-m-d') ,
+        userPublicKey: userPublicKey, 
+        userPrivateKey: userPrivateKey,
+
+      }, function () { 
+        console.log("Registration response:\n" + JSON.stringify(response));
+        if(userFullyRegistered && this.state.galleryId){ //gallery already created
+          console.log("no need to load gallery, it's the fully registration");
+          if(userFullyRegistered && this.state.userLogged) this.props.history.push('/profile'); 
+          else this.props.history.push('/signin'); 
+        } else {
+          this.createGallery().then( response => {
+            if(response) {} // console.log("Gallery created after registration");
+            else console.log("error creating Gallery after registration");
+            this.props.history.push('/signin');
+          });       
+        } 
+      });
+    }
+  }
+
   render() {
-    /*if (this.state.redirect) {
-      return (<Redirect to={'/shops/'+this.match.params.shopId}/>)
-    }*/
+    if (this.state.redirect) {
+      return (<Redirect to={"/users/" + this.props.userState.userId + "/" + this.props.userState.galleryId}/>)
+    }
     const {classes} = this.props
     return (<div>
       <Card className={classes.card}>
@@ -141,8 +209,8 @@ class NewProduct extends Component {
           }
         </CardContent>
         <CardActions>
-          <Button color="primary" variant="raised" onClick={this.clickSubmit} className={classes.submit}>Submit</Button>
-          <Link to={'/my-art/'} className={classes.submit}><Button variant="raised">Cancel</Button></Link>
+          <Button color="primary" variant="raised" onClick={this.handleCreateArtworkSubmit} className={classes.submit}>Submit</Button>
+          <Link to={"/users/" + this.props.userState.userId + "/" + this.props.userState.galleryId} className={classes.submit}><Button variant="raised">Cancel</Button></Link>
         </CardActions>
       </Card>
     </div>)

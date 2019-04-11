@@ -87,10 +87,7 @@ class Profile extends Component {
   }
 
   render(){
-    const { classes } = this.props;
-    const { userState } = this.props;
-
-   
+    const { classes, userState } = this.props; 
 
     return (  
     
@@ -111,7 +108,7 @@ class Profile extends Component {
                         <td style={{width:'50%'}}>               
                           <div className={classes.userName}>{userState.firstName}</div>
                           <div className={classes.userDetail}>Unverified User</div>
-                          <Link to={"/user/edit/" /*+ this.state.user._id*/}>
+                          <Link to={"/users/" + userState.userId + "/edit/"}>
                             <Button className={classes.fullBtn+' '+classes.btnblu}>Edit Profile</Button>
                           </Link>
                         </td>
@@ -161,7 +158,7 @@ class Profile extends Component {
           <div className={classes.sectionTitle}>MY ART</div>
           <div className={classes.sectionContainer}>
             <div className={classes.sectionText}>In this section lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <span className={classes.blu}>MY ART</span></div>
-            <Link to={"my-art"/*"/shops/" + this.state.shopId*/}>
+            <Link to={"/users/" + userState.userId + "/" + userState.galleryId}>
               <Button className={classes.fullBtn+' '+classes.btnblu+' '+classes.btnFloat}>MY ART</Button>
             </Link>
           </div>
@@ -173,7 +170,7 @@ class Profile extends Component {
           <div className={classes.sectionTitle}>MY FINANCIALS</div>
           <div className={classes.sectionContainer}>
             <div className={classes.sectionText}>In this section lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, <span className={classes.blu}>MY FINANCIALS</span></div>
-            <Link to={"/profile/financials"}>
+            <Link to={"/users/" + userState.userId + "/financials"}>
               <Button className={classes.fullBtn+' '+classes.btnblu+' '+classes.btnFloat}>MY FINANCIALS</Button>
             </Link>
           </div>
