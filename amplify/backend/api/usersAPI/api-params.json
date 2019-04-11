@@ -1,0 +1,34 @@
+{
+    "paths": [
+        {
+            "name": "/users",
+            "lambdaFunction": "usersLambda",
+            "privacy": {
+                "open": true
+            }
+        }
+    ],
+    "resourceName": "usersAPI",
+    "apiName": "usersAPI",
+    "functionArns": [
+        {
+            "lambdaFunction": "usersLambda"
+        }
+    ],
+    "privacy": {
+        "auth": 0,
+        "unauth": 0,
+        "authRoleName": "ll-platform-20190411101445-authRole",
+        "unAuthRoleName": "ll-platform-20190411101445-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "usersLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}

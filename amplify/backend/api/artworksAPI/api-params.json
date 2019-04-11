@@ -1,0 +1,34 @@
+{
+    "paths": [
+        {
+            "name": "/artworks",
+            "lambdaFunction": "artworksLambda",
+            "privacy": {
+                "open": true
+            }
+        }
+    ],
+    "resourceName": "artworksAPI",
+    "apiName": "artworksAPI",
+    "functionArns": [
+        {
+            "lambdaFunction": "artworksLambda"
+        }
+    ],
+    "privacy": {
+        "auth": 0,
+        "unauth": 0,
+        "authRoleName": "ll-platform-20190411101445-authRole",
+        "unAuthRoleName": "ll-platform-20190411101445-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "artworksLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}

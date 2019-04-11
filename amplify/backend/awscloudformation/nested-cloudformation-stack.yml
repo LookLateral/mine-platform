@@ -1,0 +1,344 @@
+{
+	"AWSTemplateFormatVersion": "2010-09-09",
+	"Description": "Root stack for the Amplify AWS CloudFormation provider",
+	"Parameters": {
+		"DeploymentBucketName": {
+			"Description": "Name of the common deployment bucket provided by the parent stack",
+			"Type": "String",
+			"Default": "DeploymentBucket"
+		},
+		"AuthRoleName": {
+			"Type": "String",
+			"Default": "AuthRoleName"
+		},
+		"UnauthRoleName": {
+			"Type": "String",
+			"Default": "UnauthRoleName"
+		}
+	},
+	"Resources": {
+		"DeploymentBucket": {
+			"Type": "AWS::S3::Bucket",
+			"DeletionPolicy": "Retain",
+			"Properties": {
+				"BucketName": {
+					"Ref": "DeploymentBucketName"
+				}
+			}
+		},
+		"AuthRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Ref": "AuthRoleName"
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "",
+							"Effect": "Allow",
+							"Principal": {
+								"Federated": "cognito-identity.amazonaws.com"
+							},
+							"Action": "sts:AssumeRoleWithWebIdentity",
+							"Condition": {
+								"ForAnyValue:StringLike": {
+									"cognito-identity.amazonaws.com:amr": "authenticated"
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		"UnauthRole": {
+			"Type": "AWS::IAM::Role",
+			"Properties": {
+				"RoleName": {
+					"Ref": "UnauthRoleName"
+				},
+				"AssumeRolePolicyDocument": {
+					"Version": "2012-10-17",
+					"Statement": [
+						{
+							"Sid": "",
+							"Effect": "Allow",
+							"Principal": {
+								"Federated": "cognito-identity.amazonaws.com"
+							},
+							"Action": "sts:AssumeRoleWithWebIdentity",
+							"Condition": {
+								"ForAnyValue:StringLike": {
+									"cognito-identity.amazonaws.com:amr": "unauthenticated"
+								}
+							}
+						}
+					]
+				}
+			}
+		},
+		"hostingS3AndCloudFront": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/hosting/template.json",
+				"Parameters": {
+					"bucketName": "ll-platform-20190411101546-hostingbucket",
+					"env": "dev"
+				}
+			}
+		},
+		"storageusersTable": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/storage/usersTable-cloudformation-template.json",
+				"Parameters": {
+					"tableName": "usersTable",
+					"partitionKeyName": "user_email",
+					"partitionKeyType": "S",
+					"env": "dev"
+				}
+			}
+		},
+		"storagegalleriesTable": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/storage/galleriesTable-cloudformation-template.json",
+				"Parameters": {
+					"tableName": "galleriesTable",
+					"partitionKeyName": "user_email",
+					"partitionKeyType": "S",
+					"env": "dev"
+				}
+			}
+		},
+		"storageartworksTable": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/storage/artworksTable-cloudformation-template.json",
+				"Parameters": {
+					"tableName": "artworksTable",
+					"partitionKeyName": "id",
+					"partitionKeyType": "S",
+					"env": "dev"
+				}
+			}
+		},
+		"functionusersLambda": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/function/usersLambda-cloudformation-template.json",
+				"Parameters": {
+					"storageusersTableName": {
+						"Fn::GetAtt": [
+							"storageusersTable",
+							"Outputs.Name"
+						]
+					},
+					"storageusersTableArn": {
+						"Fn::GetAtt": [
+							"storageusersTable",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"functiongalleriesLambda": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/function/galleriesLambda-cloudformation-template.json",
+				"Parameters": {
+					"storagegalleriesTableName": {
+						"Fn::GetAtt": [
+							"storagegalleriesTable",
+							"Outputs.Name"
+						]
+					},
+					"storagegalleriesTableArn": {
+						"Fn::GetAtt": [
+							"storagegalleriesTable",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"functionartworksLambda": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/function/artworksLambda-cloudformation-template.json",
+				"Parameters": {
+					"storageartworksTableName": {
+						"Fn::GetAtt": [
+							"storageartworksTable",
+							"Outputs.Name"
+						]
+					},
+					"storageartworksTableArn": {
+						"Fn::GetAtt": [
+							"storageartworksTable",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"apiusersAPI": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/api/usersAPI-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functionusersLambdaName": {
+						"Fn::GetAtt": [
+							"functionusersLambda",
+							"Outputs.Name"
+						]
+					},
+					"functionusersLambdaArn": {
+						"Fn::GetAtt": [
+							"functionusersLambda",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"apigalleriesAPI": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/api/galleriesAPI-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functiongalleriesLambdaName": {
+						"Fn::GetAtt": [
+							"functiongalleriesLambda",
+							"Outputs.Name"
+						]
+					},
+					"functiongalleriesLambdaArn": {
+						"Fn::GetAtt": [
+							"functiongalleriesLambda",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"apiartworksAPI": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/api/artworksAPI-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functionartworksLambdaName": {
+						"Fn::GetAtt": [
+							"functionartworksLambda",
+							"Outputs.Name"
+						]
+					},
+					"functionartworksLambdaArn": {
+						"Fn::GetAtt": [
+							"functionartworksLambda",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		}
+	},
+	"Outputs": {
+		"Region": {
+			"Description": "CloudFormation provider root stack Region",
+			"Value": {
+				"Ref": "AWS::Region"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-Region"
+				}
+			}
+		},
+		"StackName": {
+			"Description": "CloudFormation provider root stack ID",
+			"Value": {
+				"Ref": "AWS::StackName"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-StackName"
+				}
+			}
+		},
+		"StackId": {
+			"Description": "CloudFormation provider root stack name",
+			"Value": {
+				"Ref": "AWS::StackId"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-StackId"
+				}
+			}
+		},
+		"DeploymentBucketName": {
+			"Description": "CloudFormation provider root stack deployment bucket name",
+			"Value": {
+				"Ref": "DeploymentBucketName"
+			},
+			"Export": {
+				"Name": {
+					"Fn::Sub": "${AWS::StackName}-DeploymentBucketName"
+				}
+			}
+		},
+		"AuthRoleArn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"AuthRole",
+					"Arn"
+				]
+			}
+		},
+		"UnauthRoleArn": {
+			"Value": {
+				"Fn::GetAtt": [
+					"UnauthRole",
+					"Arn"
+				]
+			}
+		},
+		"AuthRoleName": {
+			"Value": {
+				"Ref": "AuthRole"
+			}
+		},
+		"UnauthRoleName": {
+			"Value": {
+				"Ref": "UnauthRole"
+			}
+		}
+	}
+}

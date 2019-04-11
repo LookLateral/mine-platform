@@ -1,0 +1,5 @@
+{
+    "tableName": "galleriesTable",
+    "partitionKeyName": "user_email",
+    "partitionKeyType": "S"
+}

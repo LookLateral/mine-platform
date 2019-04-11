@@ -1,0 +1,5 @@
+{
+    "tableName": "artworksTable",
+    "partitionKeyName": "id",
+    "partitionKeyType": "S"
+}

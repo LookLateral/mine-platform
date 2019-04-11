@@ -1,0 +1,34 @@
+{
+    "paths": [
+        {
+            "name": "/galleries",
+            "lambdaFunction": "galleriesLambda",
+            "privacy": {
+                "open": true
+            }
+        }
+    ],
+    "resourceName": "galleriesAPI",
+    "apiName": "galleriesAPI",
+    "functionArns": [
+        {
+            "lambdaFunction": "galleriesLambda"
+        }
+    ],
+    "privacy": {
+        "auth": 0,
+        "unauth": 0,
+        "authRoleName": "ll-platform-20190411101445-authRole",
+        "unAuthRoleName": "ll-platform-20190411101445-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "galleriesLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}
