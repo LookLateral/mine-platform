@@ -8,10 +8,14 @@ import Button from '@material-ui/core/Button'
 //import FileUpload from '@material-ui/icons/FileUpload'
 //import auth from './../auth/auth-helper'
 import TextField from '@material-ui/core/TextField'
+import Checkbox from '@material-ui/core/Checkbox'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Typography from '@material-ui/core/Typography'
 import Icon from '@material-ui/core/Icon'
 //import {create} from './api-product.js'
 import {Link, Redirect} from 'react-router-dom'
+import { API } from 'aws-amplify';
+
 
 const styles = theme => ({
   card: {
@@ -50,16 +54,21 @@ class NewProduct extends Component {
   constructor({match}) {
     super()
     this.state = {
-      id: '',
-      userId: '',
-      name: '',
-      artist: '',
-      description: '',
+      id: null,
+      userId: null,
+      name: null,
+      artist: null,
+      description: null,
       images: [],
-      category: '',
-      quantity: '',
-      price: '',
-      creationDate: '',
+      category: null,
+      //quantity: 0,
+      price: 0,
+      size: null,
+      markings: null,
+
+      creationDate: null,
+      txnId: null,
+      bucketId: null,
 
       viewable: false,
       tagged: false,
@@ -71,11 +80,11 @@ class NewProduct extends Component {
       error: ''
     }
     this.match = match
+    this.createArtwork = this.createArtwork.bind(this)
   }
 
   componentDidMount = () => {
     this.productData = new FormData()
-
     if (!this.props.userState.userLogged) {
         return <Redirect to='/signin'/>
     }
@@ -89,32 +98,20 @@ class NewProduct extends Component {
     this.setState({ [name]: value })
   }
 
-  clickSubmit = () => {
-    /*const jwt = auth.isAuthenticated()
-    create({
-      shopId: this.match.params.shopId
-    }, {
-      t: jwt.token
-    }, this.productData).then((data) => {
-      if (data.error) {
-        this.setState({error: data.error})
-      } else {
-        this.setState({error: '', redirect: true})
-        const jwt = auth.isAuthenticated()
-        
-        // SIMONOTES: 
-        //need to call here initPaintingForUpload() to write to bigchain!!
-        //also, need to get back txSigned.id and write it to mongodb
-        //how to write on mongo? do we need transaction.model and transaction.controller?
-        
-      }
-    })*/
+  handleCheckbox = name => event => {
+    if(name === 'viewable')  this.setState({ viewable: !this.state.viewable });
   }
 
   handleCreateArtworkSubmit = (e) => {
     e.preventDefault();
-    this.createArtwork();
+
+    // SIMONOTES: 
+    //need to call here initPaintingForUpload() to write to bigchain!!
+    //also, need to get back txSigned.id and write it to db
+    //also, need to save img and get bucketId
     console.log('posting artwork');
+    this.createArtwork();
+    
   }
   
   createArtwork = async () => {
@@ -122,7 +119,7 @@ class NewProduct extends Component {
       alert('Please complete all required fields'); 
       return false;
     } else {              
-      const response = await API.post('artworksAPI', '/artworks/', {
+      const data = await API.post('artworksAPI', '/artworks/', {
         body: {
           id: null,
           userId: this.props.userState.userId,
@@ -131,41 +128,30 @@ class NewProduct extends Component {
           description: this.state.description,
           images: [],
           category: this.state.category,
-          quantity: this.state.quantity,
+          //quantity: this.state.quantity,
           price: this.state.price,
-          creationDate: Date('Y-m-d'),
+          size: this.state.size,
+          markings: this.state.markings,
           
-          viewable: false,
+          creationDate: Date('Y-m-d'),
+          txnId: null,
+          bucketId: null,
+          
+          viewable: this.state.viewable,
           tagged: false,
           tokenized: false,
           onSale: false,
           buyback: false,
-          
+          // ZUNOTE: enough?  
         }
-      });      
-
-      this.setState({
-        userRegistered: true, 
-        userFullyRegistered: userFullyRegistered,
-        registrationDate: userFullyRegistered ? this.state.registrationDate : Date('Y-m-d'), 
-        registrationDateUpdate: Date('Y-m-d') ,
-        userPublicKey: userPublicKey, 
-        userPrivateKey: userPrivateKey,
-
-      }, function () { 
-        console.log("Registration response:\n" + JSON.stringify(response));
-        if(userFullyRegistered && this.state.galleryId){ //gallery already created
-          console.log("no need to load gallery, it's the fully registration");
-          if(userFullyRegistered && this.state.userLogged) this.props.history.push('/profile'); 
-          else this.props.history.push('/signin'); 
-        } else {
-          this.createGallery().then( response => {
-            if(response) {} // console.log("Gallery created after registration");
-            else console.log("error creating Gallery after registration");
-            this.props.history.push('/signin');
-          });       
-        } 
-      });
+      });   
+      
+      if (data.error) {
+        this.setState({error: data.error})
+      } else {
+        console.log("Artwork creation response:\n" + JSON.stringify(data));
+        this.setState({error: '', redirect: true})
+      }
     }
   }
 
@@ -182,26 +168,85 @@ class NewProduct extends Component {
           </Typography><br/>
           <input accept="image/*" onChange={this.handleChange('image')} className={classes.input} id="icon-button-file" type="file"/>
           <label htmlFor="icon-button-file">
-            <Button variant="raised" color="secondary" component="span">
+            <Button variant="contained" color="secondary" component="span">
               Upload Photo
               {/*<FileUpload/>*/}
             </Button>
           </label> <span className={classes.filename}>{this.state.image ? this.state.image.name : ''}</span><br/>
-          <TextField id="name" label="Name" className={classes.textField} value={this.state.name} onChange={this.handleChange('name')} margin="normal"/><br/>
-          <TextField id="name" label="Artist" className={classes.textField} value={this.state.artist} onChange={this.handleChange('artist')} margin="normal"/><br/>
+          <TextField 
+                id="name" 
+                label="Name" 
+                className={classes.textField} 
+                value={this.state.name || ""} 
+                onChange={this.handleChange('name')} 
+                margin="normal"/><br/>
+          <TextField 
+                id="artist" 
+                label="Artist" 
+                className={classes.textField} 
+                value={this.state.artist || ""} 
+                onChange={this.handleChange('artist')} 
+                margin="normal"/><br/>
           <TextField
-            id="multiline-flexible"
-            label="Description" 
-            multiline
-            rows="2"
-            value={this.state.description}
-            onChange={this.handleChange('description')}
-            className={classes.textField}
-            margin="normal"
-          /><br/>
-          <TextField id="category" label="Category" className={classes.textField} value={this.state.category} onChange={this.handleChange('category')} margin="normal"/><br/>
-          {/*<TextField id="quantity" label="Quantity (field to be removed)" className={classes.textField} value={this.state.quantity} onChange={this.handleChange('quantity')} type="number" margin="normal"/><br/>*/}
-          <TextField id="price" label="Price" className={classes.textField} value={this.state.price} onChange={this.handleChange('price')} type="number" margin="normal"/><br/>
+                id="multiline-flexible"
+                label="Description" 
+                multiline
+                rows="2"
+                value={this.state.description || ""}
+                onChange={this.handleChange('description')} 
+                className={classes.textField}
+                margin="normal"/><br/>
+          <TextField 
+                id="category" 
+                label="Category" 
+                className={classes.textField} 
+                value={this.state.category || ""} 
+                onChange={this.handleChange('category')} 
+                margin="normal"/><br/>
+          {/*
+          <TextField 
+                id="quantity" 
+                label="Quantity (field to be removed)" 
+                className={classes.textField} 
+                value={this.state.quantity || null} 
+                onChange={this.handleChange('quantity')} 
+                type="number" 
+                margin="normal"/><br/>*/}
+          <TextField 
+                id="price" 
+                label="Price" 
+                className={classes.textField} 
+                value={this.state.price !== 0 ? this.state.price : ""} 
+                onChange={this.handleChange('price')} 
+                type="number" 
+                margin="normal"/><br/>
+            <TextField 
+                id="size" 
+                label="Size" 
+                className={classes.textField} 
+                value={this.state.size || ""} 
+                onChange={this.handleChange('size')} 
+                margin="normal"/><br/>
+            <TextField
+                id="markings"
+                label="Markings" 
+                multiline
+                rows="2"
+                value={this.state.markings || ""}
+                onChange={this.handleChange('markings')} 
+                className={classes.textField}
+                margin="normal"/><br/>
+
+            <FormControlLabel
+                label="Want it visible in our Provenance section?"
+                control={
+                    <Checkbox
+                        checked={this.state.viewable}
+                        onChange={this.handleCheckbox('viewable')}
+                        color="primary"
+                      /> }/><br/>
+                        
+                      
           {
             this.state.error && (<Typography component="p" color="error">
               <Icon color="error" className={classes.error}>error</Icon>
@@ -209,8 +254,8 @@ class NewProduct extends Component {
           }
         </CardContent>
         <CardActions>
-          <Button color="primary" variant="raised" onClick={this.handleCreateArtworkSubmit} className={classes.submit}>Submit</Button>
-          <Link to={"/users/" + this.props.userState.userId + "/" + this.props.userState.galleryId} className={classes.submit}><Button variant="raised">Cancel</Button></Link>
+          <Button color="primary" variant="contained" onClick={this.handleCreateArtworkSubmit} className={classes.submit}>Submit</Button>
+          <Link to={"/users/" + this.props.userState.userId + "/" + this.props.userState.galleryId} className={classes.submit}><Button variant="contained">Cancel</Button></Link>
         </CardActions>
       </Card>
     </div>)

@@ -52,6 +52,27 @@ const convertUrlType = (param, type) => {
   }
 }
 
+/***************************************************************************
+ * ZUNOTE: added as  https://github.com/aws-amplify/amplify-js/issues/1857 *
+ ***************************************************************************/
+
+app.get('/users', function (req, res) {
+  var params = {
+    TableName: tableName,
+    Select: 'ALL_ATTRIBUTES',
+  };
+  dynamodb.scan(params, (err, data) => {
+    if (err) {
+      res.json({ error: 'Could not load items: ' + err.message });
+    }
+    res.json({
+      data: data.Items.map(item => {
+        return item;
+      })
+    });
+  });
+});
+
 /********************************
  * HTTP Get method for list objects *
  ********************************/

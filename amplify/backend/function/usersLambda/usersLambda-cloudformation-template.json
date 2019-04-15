@@ -63,8 +63,8 @@
 				"Runtime": "nodejs8.10",
 				"Timeout": "25",
 				"Code": {
-					"S3Bucket": "ll-platform-20190411101445-deployment",
-					"S3Key": "amplify-builds/usersLambda-1554979247-latest-build.zip"
+					"S3Bucket": "ll-platform-20190412100542-deployment",
+					"S3Key": "amplify-builds/usersLambda-1555082352-latest-build.zip"
 				}
 			}
 		},
@@ -74,12 +74,12 @@
 				"RoleName": {
 					"Fn::If": [
 						"ShouldNotCreateEnvResources",
-						"llplatformLambdaRolee0b13e37",
+						"llplatformLambdaRole47e1e2ef",
 						{
 							"Fn::Join": [
 								"",
 								[
-									"llplatformLambdaRolee0b13e37",
+									"llplatformLambdaRole47e1e2ef",
 									"-",
 									{
 										"Ref": "env"

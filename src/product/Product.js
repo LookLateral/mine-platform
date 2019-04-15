@@ -2,20 +2,18 @@ import React, {Component} from 'react'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles';
 import {Link, Redirect} from 'react-router-dom'
-
 import Button from '@material-ui/core/Button'
 import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
-import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
-
+import { API } from 'aws-amplify';
 //import {read, listRelated} from './api-product.js'
 //import Suggestions from './../product/Suggestions'
 //import AddToCart from './../cart/AddToCart'
-
 import BackgroundLeft from '../assets/images/image-home-sx.jpg';
 import fractPic from '../assets/images/fractPic.png';
+import EmptyPic from '../assets/images/empty-pic.jpg';
 
 
 const styles = theme => ({
@@ -109,6 +107,7 @@ const styles = theme => ({
   },
   boxLeft: {
     borderRight: '1px solid blue',
+    minWidth: '50%'
   },
   titleInfo: {
     fontSize: '1.8em',
@@ -153,46 +152,87 @@ class Product extends Component {
   constructor({match}) {
     super()
     this.state = {
-      product: {shop: {}},
+      id: null,
+      userId: null,
+      name: null,
+      artist: null,
+      description: null,
+      images: [],
+      category: null,
+      //quantity: 0,
+      price: 0,
+      size: null,
+      markings: null,
+
+      creationDate: null,
+      txnId: null,
+      bucketId: null,
+      
+      viewable: false,
+      tagged: false,
+      tokenized: false,
+      onSale: false,
+      buyback: false,
+
       suggestions: [],
       suggestionTitle: 'Related Products'
     }
     this.match = match
+    this.loadProduct = this.loadProduct.bind(this)
   }
-  /*loadProduct = (productId) => {
-    read({productId: productId}).then((data) => {
-      if (data.error) {
-        this.setState({error: data.error})
-      } else {
-        this.setState({product: data})
-        listRelated({
-          productId: data._id}).then((data) => {
-          if (data.error) {
-            console.log(data.error)
-          } else {
-            this.setState({suggestions: data})
-          }
-        })
-     }
-    })
-  }*/
+  
+  loadProduct = async (productId) => {
+    const data = await API.get('artworksAPI', '/artworks/' + productId);
+    if (data.error) {
+      this.setState({ error: data.error })
+      console.log('error loading artwork:\n' + JSON.stringify(data.error))
+    } else {
+      this.setState({ 
+        id: data[0].id,
+        userId: data[0].userId,
+        name: data[0].name,
+        artist: data[0].artist,
+        description: data[0].description,
+        images: [],
+        category: data[0].category,
+        //quantity: data[0].quantity,
+        price: data[0].price,
+        size: data[0].size,
+        markings: data[0].markings,
+
+        creationDate: data[0].creationDate,
+        txnId: data[0].txnId,
+        bucketId: data[0].bucketId || null,
+           
+        viewable: data[0].viewable,
+        tagged: data[0].tagged,
+        tokenized: data[0].tokenized,
+        onSale: data[0].onSale,
+        buyback: data[0].buyback 
+      })
+    }
+  }
+
   componentDidMount = () => {
     if (!this.props.userState.userLogged) {
         return <Redirect to='/signin'/>
-      }
-    
+    }
     //this.loadProduct(this.match.params.productId)
+    //this.forceUpdate()
+    this.props.handleForceReload()
   }
+
   componentWillReceiveProps = (props) => {
-    //this.loadProduct(props.match.params.productId)
+    this.loadProduct(props.match.params.productId)
   }
 
   render() {
     /*const imageUrl = this.state.product._id
           ? `/api/product/image/${this.state.product._id}?${new Date().getTime()}`
           : '/api/product/defaultphoto'*/
-    const imageUrl = ""
+    const imageUrl = EmptyPic // ZUNOTE: need to fix
     const {classes} = this.props
+
     return (
         <div className={classes.root}>
           <Grid container spacing={40} className={classes.noPaddingGrid}>
@@ -203,48 +243,48 @@ class Product extends Component {
                   <CardMedia
                     className={classes.media}
                     image={imageUrl}
-                    title={this.state.product.name}
+                    title={this.state.name}
                   />
-                  <Typography component="p" type="subheading" className={classes.subheading}>
-                    <div className={classes.artist}>Artist Name</div><br/>
-                    <div className={classes.title}>{/*this.state.product.name*/}Artwork name</div><br/>
-                    <div className={classes.price}>Estimate: $ {/*this.state.product.price*/}428,000.00</div>
+                  <div type="subheading" className={classes.subheading}>
+                    <div className={classes.artist}>{this.state.artist}</div><br/>
+                    <div className={classes.title}>{this.state.name}</div><br/>
+                    <div className={classes.price}>Estimate: $ {this.state.price}</div>
                     <div className={classes.divider}></div>
                     <div style={{marginBottom: '20px'}}>
                       <span className={classes.fractPic}><img src={fractPic} alt="0%" /></span>
-                      <span className={classes.fractPerc}>0%</span>
+                      <span className={classes.fractPerc}>0%</span> { /* ZUNOTE: if tokenized and onSale -> check for get fracts by atrkorkId! */ }
                       <span className={classes.fractText}>FRACT ON SALE</span>
                     </div>
 
-                    {/* SIMONOTE: this button only if user=owner*/}
-                    <Link to={"/product/123456/edit"}>
-                      <Button 
-                          className={classes.fullBtn+' '+classes.btnorange+' '+classes.btnround} 
-                      >Edit Artwork</Button>
-                    </Link>
-                    
-                    {/* SIMONOTE: otherwise this button must be show
-                    <Link to={?????}>
-                      <Button 
+                    {  //ZUNOTE: only owner can see
+                      this.state.userId === this.props.userState.userId ? (
+                      <Link to={"/product/" + this.state.id + "/edit"}>
+                        <Button 
+                            className={classes.fullBtn+' '+classes.btnorange+' '+classes.btnround} 
+                        >Edit Artwork</Button>
+                      </Link>
+                    ) : (  //ZUNOTE: not owner - missing link
+                      <Link to={'?????'}>
+                        <Button 
                           className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround} 
-                      >Reserve</Button>
-                    </Link>*/}
-
-                  </Typography>
-                  
-
+                        >Reserve</Button>
+                      </Link>
+                    )}
+                                      
+                  </div>                
                 </div>
+
                   <CardContent>
                     <Grid item xs={7} sm={7} className={classes.boxDetail +' '+ classes.boxLeft}>
                       <div className={classes.titleInfo}>Artwork details</div>
                       <div className={classes.textInfo}>
-                        <span style={{fontWeight:'bold'}}>Size: </span> 192 by 83 by 33 cm.{/* SIMONOTE: html static */}
+                        <span style={{fontWeight:'bold'}}>Size: </span> {this.state.size}
                       </div>
                       <div className={classes.textInfo}>
-                        <span style={{fontWeight:'bold'}}>Markings: </span> signed and numbered by David Lachapelle on verso.{/* SIMONOTE: html static */}
+                        <span style={{fontWeight:'bold'}}>Markings: </span> {this.state.markings}
                       </div>
                       <div className={classes.textInfo}>
-                        <span style={{fontWeight:'bold'}}>Description: </span> {this.state.product.description}
+                        <span style={{fontWeight:'bold'}}>Description: </span> {this.state.description}
                       </div>  
                     </Grid>
 
@@ -263,40 +303,45 @@ class Product extends Component {
                 <Suggestions  products={this.state.suggestions} title='Related Products'/>
               </Grid>)*/}
           </Grid>
+          
+          { this.state.userId === this.props.userState.userId ? (
+              <Grid container spacing={40} className={classes.noPaddingGrid}>
+                <Grid item xs={12} sm={12} className={classes.noPaddingGrid}>
+                  <Card className={classes.card2}> 
+                  
+                    {/* SIMONOTE: these buttons only if user=owner; also what path?? and they are visible if the owner didn't request that */}
+                    <div style={{marginTop:20}}>
+                      <Link to={"/"}>{/* SIMONOTE: missing link */}
 
-          <Grid container spacing={40} className={classes.noPaddingGrid}>
-            <Grid item xs={12} sm={12} className={classes.noPaddingGrid}>
-              <Card className={classes.card2}> 
-              
-                 {/* SIMONOTE: these buttons only if user=owner; also what path?? and they are visible if the owner didn't request that */}
-                 <div style={{marginTop:20}}>
-                   <Link to={"/"}>{/* SIMONOTE: missing link */}
-
-                    <Button 
-                        className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround}>Ask TAG</Button>
-                    </Link>
-                  </div>
-                  <div style={{marginTop:10}}>
-                   <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link */}
-                    <span style={{fontWeight:'bold'}}>Ask TAG:</span> click here for the how-to
-                    </Link>
-                  </div>
-                  <div className={classes.dividerGrey}></div>
-                  <div style={{marginTop:34}}>
-                    <Link to={"/product/123456/tokenize" /* + this.state.product._id + "/tokenize" */ }>
-                      <Button 
-                        className={classes.fullBtn+' '+classes.btnblu+' '+classes.btnround}>TOKENIZE</Button>
-                    </Link>
-                  </div>
-                  <div style={{marginTop:10}}>
-                   <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link */}
-                    <span style={{fontWeight:'bold'}}>TOKENIZE:</span> click here for the how-to
-                    </Link>
-                  </div>
-              </Card>
-            </Grid>
-          </Grid>
+                        <Button 
+                            className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround}>Ask TAG</Button>
+                        </Link>
+                      </div>
+                      <div style={{marginTop:10}}>
+                      <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link */}
+                        <span style={{fontWeight:'bold'}}>Ask TAG:</span> click here for the how-to
+                        </Link>
+                      </div>
+                      <div className={classes.dividerGrey}></div>
+                      <div style={{marginTop:34}}>
+                        <Link to={"/product/" + this.state.id + "/tokenize" }>
+                          <Button 
+                            className={classes.fullBtn+' '+classes.btnblu+' '+classes.btnround}>TOKENIZE</Button>
+                        </Link>
+                      </div>
+                      <div style={{marginTop:10}}>
+                      <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link */}
+                        <span style={{fontWeight:'bold'}}>TOKENIZE:</span> click here for the how-to
+                        </Link>
+                      </div>
+                  </Card>
+                </Grid>
+              </Grid>
+            ) : null          
+          }     
         </div>)
+
+      
   }
 }
 

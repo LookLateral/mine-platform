@@ -18,8 +18,8 @@
     "privacy": {
         "auth": 0,
         "unauth": 0,
-        "authRoleName": "ll-platform-20190411101445-authRole",
-        "unAuthRoleName": "ll-platform-20190411101445-unauthRole"
+        "authRoleName": "ll-platform-20190412100542-authRole",
+        "unAuthRoleName": "ll-platform-20190412100542-unauthRole"
     },
     "dependsOn": [
         {

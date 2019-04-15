@@ -6,6 +6,8 @@ import {Link} from 'react-router-dom'
 import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
 import fractPic from '../assets/images/fractPic.png';
+import EmptyPic from '../assets/images/empty-pic.jpg';
+
 
 
 const styles = theme => ({
@@ -38,6 +40,7 @@ const styles = theme => ({
     width: '100%',
     textAlign: 'left',
     padding: 24,
+    lineHeight: 1,
   },
   image: {
     minHeight: 200,
@@ -141,6 +144,8 @@ class Products extends Component {
         </GridList></div>) : this.props.searched && (<Typography type="subheading" component="h4" className={classes.title}>No products found! :(</Typography>)}
       </div>)*/
       
+      // const imageUrl = '/api/product/image/'+product.id ZUNOTE: put it back in map! 
+
       return (
         <div className={classes.root}>
         {this.props.products.length > 0 ?
@@ -148,17 +153,17 @@ class Products extends Component {
             <Grid container spacing={40}>
               <Grid item xs={12} sm={12}>
                   {this.props.products.map((product, i) => (
-                    <div className={classes.artworkRow}> 
+                    <div className={classes.artworkRow} key={product.id}> 
                       <Grid item xs={6} sm={6} className={classes.boxDetail + ' ' + classes.boxLeft}>
                         {/* SIMONOTES: need to make the img verticalAlign:middle */}
-                        <Link to={"/product/"+product._id}><img className={classes.image} src={'/api/product/image/'+product._id} alt={product.name} /></Link> 
+                        <Link to={"/product/"+product.id}><img className={classes.image} src={EmptyPic} alt={product.name} /></Link> 
                       </Grid>
                       
                       <Grid item xs={6} sm={6} className={classes.boxDetail + ' ' + classes.boxRight}>
                         <div className={classes.boxInfoArtwork}>
-                          <Typography component="p" type="subheading" className={classes.subheading}>
+                          <div className={classes.subheading}>
                             {/* SIMONOTES: static html */}
-                            <div className={classes.artist}>Artist Name</div>
+                            <div className={classes.artist}>{product.artist}</div>
                             <div className={classes.title}>{product.name}</div>
                             <div className={classes.price}>Estimate: $ {product.price}</div>
                             <div className={classes.divider}></div>
@@ -167,7 +172,7 @@ class Products extends Component {
                               <span className={classes.fractPerc}>0%</span> 
                               <span className={classes.fractText}>FRACT ON SALE</span>
                             </div>
-                          </Typography>
+                          </div>
                         </div>  
                       </Grid>
                     </div>

@@ -9,6 +9,7 @@ const AWS = require('aws-sdk')
 var awsServerlessExpressMiddleware = require('aws-serverless-express/middleware')
 var bodyParser = require('body-parser')
 var express = require('express')
+var uuid = require('uuid');
 
 AWS.config.update({ region: process.env.TABLE_REGION });
 
@@ -51,9 +52,30 @@ const convertUrlType = (param, type) => {
   }
 }
 
-/********************************
+/***************************************************************************
+ * ZUNOTE: added as  https://github.com/aws-amplify/amplify-js/issues/1857 *
+ ***************************************************************************/
+
+app.get('/artworks', function (req, res) {
+  var params = {
+    TableName: tableName,
+    Select: 'ALL_ATTRIBUTES',
+  };
+  dynamodb.scan(params, (err, data) => {
+    if (err) {
+      res.json({ error: 'Could not load items: ' + err.message });
+    }
+    res.json({
+      data: data.Items.map(item => {
+        return item;
+      })
+    });
+  });
+});
+
+/************************************
  * HTTP Get method for list objects *
- ********************************/
+ ************************************/
 
 app.get(path + hashKeyPath, function(req, res) {
   var condition = {}
@@ -84,6 +106,49 @@ app.get(path + hashKeyPath, function(req, res) {
     }
   });
 });
+
+/****************************************************
+ * ZUNOTE: HTTP Get method for list objects by user *
+ ****************************************************/
+
+/*app.getByUser(path + '/user' + hashKeyPath, function(req, res) { // ZUNOTE: tryed as get req
+  var condition = {}
+  condition[partitionKeyName] = {
+    ComparisonOperator: 'EQ'
+  }
+  
+  if (userIdPresent && req.apiGateway) {
+    condition[partitionKeyName]['AttributeValueList'] = [req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH ];
+  } else {
+    try {
+      condition[partitionKeyName]['AttributeValueList'] = [ convertUrlType(req.params[partitionKeyName], partitionKeyType) ];
+    } catch(err) {
+      res.json({error: 'Wrong column type ' + err});
+    }
+  }
+
+  const userId = req.body.userId
+
+  let queryParams = {
+    TableName: tableName,
+    KeyConditions: condition,
+    ExpressionAttributeNames: {
+      '#userId': 'userId',
+    },
+    ExpressionAttributeValues: {
+      ':userId': userId
+    },
+  }
+
+  dynamodb.query(queryParams, (err, data) => {
+    if (err) {
+      res.json({error: 'Could not load items: ' + err});
+    } else {
+      res.json(data.Items);
+    }
+  });
+});*/
+
 
 /*****************************************
  * HTTP Get method for get single object *
@@ -160,6 +225,10 @@ app.post(path, function(req, res) {
   if (userIdPresent) {
     req.body['userId'] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH;
   }
+
+  // ZUNOTE: check for req.artworkId
+  if(req.body.id === null) req.body.id = uuid.v1()
+
 
   let putItemParams = {
     TableName: tableName,

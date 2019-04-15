@@ -9,11 +9,16 @@ import CardActions from '@material-ui/core/CardActions';
 import Button from '@material-ui/core/Button'
 //import FileUpload from 'material-ui-icons/FileUpload'
 import TextField from '@material-ui/core/TextField'
+import Checkbox from '@material-ui/core/Checkbox'
+import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Typography from '@material-ui/core/Typography'
 import Icon from '@material-ui/core/Icon'
 import Avatar from '@material-ui/core/Avatar'
 //import {read, update} from './api-product.js'
 //import auth from './../auth/auth-helper'
+import { API } from 'aws-amplify';
+import EmptyPic from '../assets/images/empty-pic.jpg';
+
 
 const styles = theme => ({
   card: {
@@ -58,12 +63,28 @@ class EditProduct extends Component {
   constructor({match}) {
     super()
     this.state = {
-      name: '',
-      description: '',
-      image: '',
-      category: '',
-      quantity: '',
-      price: '',
+      id: null,
+      userId: null,
+      name: null,
+      artist: null,
+      description: null,
+      images: [],
+      category: null,
+      //quantity: 0,
+      price: 0,
+      size: null,
+      markings: null,
+      
+      creationDate: null,
+      txnId: null,
+      bucketId: null,
+
+      viewable: false,
+      tagged: false,
+      tokenized: false,
+      onSale: false,
+      buyback: false,
+
       redirect: false,
       error: ''
     }
@@ -72,34 +93,18 @@ class EditProduct extends Component {
 
   componentDidMount = () => {
     this.productData = new FormData()
-    /*read({
-      productId: this.match.params.productId
-    }).then((data) => {
-      if (data.error) {
-        this.setState({error: data.error})
-      } else {
-        this.setState({id: data._id, name: data.name, description: data.description, category: data.category, quantity:data.quantity, price: data.price})
-      }
-    })*/
     if (!this.props.userState.userLogged) {
       return <Redirect to='/signin'/>
     }
+    //this.loadProduct(this.match.params.productId)
+    //this.forceUpdate()
+    this.props.handleForceReload()
   }
-  clickSubmit = () => {
-    /*const jwt = auth.isAuthenticated()
-    update({
-      shopId: this.match.params.shopId,
-      productId: this.match.params.productId
-    }, {
-      t: jwt.token
-    }, this.productData).then((data) => {
-      if (data.error) {
-        this.setState({error: data.error})
-      } else {
-        this.setState({'redirect': true})
-      }
-    })*/
+
+  componentWillReceiveProps = (props) => {
+    this.loadProduct(props.match.params.productId)
   }
+
   handleChange = name => event => {
     const value = name === 'image'
       ? event.target.files[0]
@@ -108,15 +113,101 @@ class EditProduct extends Component {
     this.setState({ [name]: value })
   }
 
+  handleCheckbox = name => event => {
+    if(name === 'viewable')  this.setState({ viewable: !this.state.viewable });
+  }
+
+  handleUpdateArtworkSubmit = (e) => {
+    e.preventDefault();
+
+    // SIMONOTES: 
+    //need to call here initPaintingForUpload() to write to bigchain!!
+    //also, need to get back txSigned.id and write it to db
+    console.log('updating artwork');
+    this.updateArtwork();
+    
+  }
+
+  loadProduct = async (productId) => {
+    const data = await API.get('artworksAPI', '/artworks/' + productId);
+    if (data.error) {
+      this.setState({ error: data.error })
+      alert('error loading artwork:\n' + JSON.stringify(data.error))
+    } else {
+      this.setState({ 
+        id: data[0].id,
+        userId: data[0].userId,
+        name: data[0].name,
+        artist: data[0].artist,
+        description: data[0].description,
+        images: [],
+        category: data[0].category,
+        //quantity: data[0].quantity,
+        price: data[0].price,
+        size: data[0].size,
+        markings: data[0].markings,
+
+        creationDate: data[0].creationDate,
+        txnId: data[0].txnId,
+        bucketId: data[0].bucketId || null,
+           
+        viewable: data[0].viewable,
+        tagged: data[0].tagged,
+        tokenized: data[0].tokenized,
+        onSale: data[0].onSale,
+        buyback: data[0].buyback
+      })
+    }
+  }
+
+  updateArtwork = async () => {
+    if(this.state.name===null || this.state.artist===null){
+      alert('Please complete all required fields'); 
+      return false;
+    } else {       
+      const data = await API.post('artworksAPI', '/artworks/', {
+        body: {
+          id: this.state.id,
+          userId: this.state.userId,
+          name: this.state.name,
+          artist: this.state.artist,
+          description: this.state.description,
+          images: [],
+          category: this.state.category,
+          //quantity: this.state.quantity,
+          price: this.state.price,
+          size: this.state.size,
+          markings: this.state.markings,
+
+          creationDate: this.state.creationDate,
+          txnId: this.state.txnId,
+          bucketId: this.state.bucketId,
+          
+          viewable: this.state.viewable,
+          tagged: this.state.tagged,
+          tokenized: this.state.tokenized,
+          onSale: this.state.onSale,
+          buyback: this.state.buyback
+        }
+      });   
+      
+      if (data.error) {
+        this.setState({error: data.error})
+      } else {
+        console.log("Artwork update response:\n" + JSON.stringify(data));
+        this.setState({error: '', redirect: true})
+      }
+    }
+  }
+
   render() {
     /*const imageUrl = this.state.id
           ? `/api/product/image/${this.state.id}?${new Date().getTime()}`
           : '/api/product/defaultphoto'*/
-    const imageUrl = ""
+    const imageUrl = EmptyPic // ZUNOTE: need to fix
 
     if (this.state.redirect) {
-      //return (<Redirect to={'/seller/shop/edit/'+this.match.params.shopId}/>)
-      return (<Redirect to={'/product/123456'/*+this.state.id*/}/>)
+      return (<Redirect to={'/product/' + this.state.id }/>)
     }
     const {classes} = this.props
     return (<div>
@@ -128,25 +219,83 @@ class EditProduct extends Component {
           <Avatar src={imageUrl} className={classes.bigAvatar}/><br/>
           <input accept="image/*" onChange={this.handleChange('image')} className={classes.input} id="icon-button-file" type="file" />
           <label htmlFor="icon-button-file">
-            <Button variant="raised" color="secondary" component="span">
+            <Button variant="contained" color="secondary" component="span">
               Change Image
               {/*<FileUpload/>*/}
             </Button>
           </label> <span className={classes.filename}>{this.state.image ? this.state.image.name : ''}</span><br/>
-          <TextField id="name" label="Name" className={classes.textField} value={this.state.name} onChange={this.handleChange('name')} margin="normal"/><br/>
+          <TextField 
+                id="name" 
+                label="Name" 
+                className={classes.textField} 
+                value={this.state.name || ""} 
+                onChange={this.handleChange('name')} 
+                margin="normal"/><br/>
+          <TextField 
+                id="artist" 
+                label="Artist" 
+                className={classes.textField} 
+                value={this.state.artist || ""} 
+                onChange={this.handleChange('artist')} 
+                margin="normal"/><br/>
           <TextField
-            id="multiline-flexible"
-            label="Description"
-            multiline
-            rows="3"
-            value={this.state.description}
-            onChange={this.handleChange('description')}
-            className={classes.textField}
-            margin="normal"
-          /><br/>
-          <TextField id="category" label="Category" className={classes.textField} value={this.state.category} onChange={this.handleChange('category')} margin="normal"/><br/>
-          {/*<TextField id="quantity" label="Quantity" className={classes.textField} value={this.state.quantity} onChange={this.handleChange('quantity')} type="number" margin="normal"/><br/>*/}
-          <TextField id="price" label="Price" className={classes.textField} value={this.state.price} onChange={this.handleChange('price')} type="number" margin="normal"/><br/>
+                id="multiline-flexible"
+                label="Description" 
+                multiline
+                rows="2"
+                value={this.state.description || ""}
+                onChange={this.handleChange('description')} 
+                className={classes.textField}
+                margin="normal"/><br/>
+          <TextField 
+                id="category" 
+                label="Category" 
+                className={classes.textField} 
+                value={this.state.category || ""} 
+                onChange={this.handleChange('category')} 
+                margin="normal"/><br/>
+          {/*
+          <TextField 
+                id="quantity" 
+                label="Quantity (field to be removed)" 
+                className={classes.textField} 
+                value={this.state.quantity || null} 
+                onChange={this.handleChange('quantity')} 
+                type="number" 
+                margin="normal"/><br/>*/}
+          <TextField 
+                id="price" 
+                label="Price" 
+                className={classes.textField} 
+                value={this.state.price !== 0 ? this.state.price : ""} 
+                onChange={this.handleChange('price')} 
+                type="number" 
+                margin="normal"/><br/>
+            <TextField 
+                id="size" 
+                label="Size" 
+                className={classes.textField} 
+                value={this.state.size || ""} 
+                onChange={this.handleChange('size')} 
+                margin="normal"/><br/>
+            <TextField
+                id="markings"
+                label="Markings" 
+                multiline
+                rows="2"
+                value={this.state.markings || ""}
+                onChange={this.handleChange('markings')} 
+                className={classes.textField}
+                margin="normal"/><br/>
+
+            <FormControlLabel
+                label="Want it visible in our Provenance section?"
+                control={
+                    <Checkbox
+                        checked={this.state.viewable}
+                        onChange={this.handleCheckbox('viewable')}
+                        color="primary"
+                      /> }/><br/>
           {
             this.state.error && (<Typography component="p" color="error">
               <Icon color="error" className={classes.error}>error</Icon>
@@ -154,10 +303,9 @@ class EditProduct extends Component {
           }
         </CardContent>
         <CardActions>
-          <Button color="primary" variant="raised" onClick={this.clickSubmit} className={classes.submit}>Update</Button>
-          {/*<Link to={'/seller/shops/edit/'+this.match.params.shopId} className={classes.submit}>*/}
-          <Link to={'/product/123456'/*+this.state.id*/} className={classes.submit}>
-            <Button variant="raised">Cancel</Button>
+          <Button color="primary" variant="contained" onClick={this.handleUpdateArtworkSubmit} className={classes.submit}>Update</Button>
+          <Link to={'/product/' + this.state.id } className={classes.submit}>
+            <Button variant="contained">Cancel</Button>
           </Link>
         </CardActions>
       </Card>

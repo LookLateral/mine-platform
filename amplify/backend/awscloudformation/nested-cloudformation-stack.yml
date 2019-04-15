@@ -81,9 +81,9 @@
 		"hostingS3AndCloudFront": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/hosting/template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/hosting/template.json",
 				"Parameters": {
-					"bucketName": "ll-platform-20190411101546-hostingbucket",
+					"bucketName": "ll-platform-20190412100839-hostingbucket",
 					"env": "dev"
 				}
 			}
@@ -91,7 +91,7 @@
 		"storageusersTable": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/storage/usersTable-cloudformation-template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/storage/usersTable-cloudformation-template.json",
 				"Parameters": {
 					"tableName": "usersTable",
 					"partitionKeyName": "user_email",
@@ -103,7 +103,7 @@
 		"storagegalleriesTable": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/storage/galleriesTable-cloudformation-template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/storage/galleriesTable-cloudformation-template.json",
 				"Parameters": {
 					"tableName": "galleriesTable",
 					"partitionKeyName": "user_email",
@@ -115,7 +115,7 @@
 		"storageartworksTable": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/storage/artworksTable-cloudformation-template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/storage/artworksTable-cloudformation-template.json",
 				"Parameters": {
 					"tableName": "artworksTable",
 					"partitionKeyName": "id",
@@ -127,7 +127,7 @@
 		"functionusersLambda": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/function/usersLambda-cloudformation-template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/function/usersLambda-cloudformation-template.json",
 				"Parameters": {
 					"storageusersTableName": {
 						"Fn::GetAtt": [
@@ -148,7 +148,7 @@
 		"functiongalleriesLambda": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/function/galleriesLambda-cloudformation-template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/function/galleriesLambda-cloudformation-template.json",
 				"Parameters": {
 					"storagegalleriesTableName": {
 						"Fn::GetAtt": [
@@ -169,7 +169,7 @@
 		"functionartworksLambda": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/function/artworksLambda-cloudformation-template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/function/artworksLambda-cloudformation-template.json",
 				"Parameters": {
 					"storageartworksTableName": {
 						"Fn::GetAtt": [
@@ -190,7 +190,7 @@
 		"apiusersAPI": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/api/usersAPI-cloudformation-template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/api/usersAPI-cloudformation-template.json",
 				"Parameters": {
 					"authRoleName": {
 						"Ref": "AuthRoleName"
@@ -217,7 +217,7 @@
 		"apigalleriesAPI": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/api/galleriesAPI-cloudformation-template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/api/galleriesAPI-cloudformation-template.json",
 				"Parameters": {
 					"authRoleName": {
 						"Ref": "AuthRoleName"
@@ -244,7 +244,7 @@
 		"apiartworksAPI": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
-				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190411101445-deployment/amplify-cfn-templates/api/artworksAPI-cloudformation-template.json",
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/api/artworksAPI-cloudformation-template.json",
 				"Parameters": {
 					"authRoleName": {
 						"Ref": "AuthRoleName"

@@ -9,6 +9,8 @@ import Button from '@material-ui/core/Button'
 import Card from '@material-ui/core/Card'
 import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
+import { API } from 'aws-amplify';
+
 
 const styles = theme => ({
   root: {
@@ -54,16 +56,23 @@ class MyArt extends Component {
       products: [],
       error: '',
     }
-    //this.match = match
+    this.match = match
+    this.loadProducts = this.loadProducts.bind(this)
   }
 
   loadProducts = async () => {
-    console.log('getting user artworks in my-art');
-    const data = await API.getByUser('artworksAPI', '/artworks/user', this.props.userState.userId);
+    if(isEmpty(this.state.products)) 
+      console.log('getting user artworks in my-art');
+    //const data = await API.getByUser('artworksAPI', '/artworks/user', { body: {userId: this.props.userState.userId} });
+    const data = await API.get('artworksAPI', '/artworks');
     if (data.error) {
       this.setState({ error: data.error })
+      alert('error loading artworks:\n' + JSON.stringify(data.error))
     } else {
-      this.setState({ products: data })
+      let myProducts = data.data.filter((product, index) => {       
+        return product.userId === this.props.userState.userId
+      });
+      this.setState({ products: myProducts })
     }
   }
 
@@ -71,13 +80,15 @@ class MyArt extends Component {
     if (!this.props.userState.userLogged) { 
       return <Redirect to='/signin' />
     }
+    this.props.handleForceReload()
+  }
+  
+  componentWillReceiveProps() {
     this.loadProducts()
   }
 
   render() {
-
-    const { classes/*, userState*/ } = this.props
-
+    const { classes } = this.props
     return (
       <div className={classes.root}>
         <Grid container spacing={24}>
@@ -102,9 +113,15 @@ class MyArt extends Component {
     )
   }
 }
-
 MyArt.propTypes = {
   classes: PropTypes.object.isRequired
 }
-
 export default withStyles(styles)(MyArt)
+
+function isEmpty(obj) {
+  for(var key in obj) {
+      if(obj.hasOwnProperty(key))
+          return false;
+  }
+  return true;
+}

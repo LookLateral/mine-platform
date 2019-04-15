@@ -78,6 +78,7 @@ class AppRoutes extends React.Component {
     }
 
     this.handleSidebar = this.handleSidebar.bind(this);
+    this.handleForceReload = this.handleForceReload.bind(this)
     this.handleChangeTextField = this.handleChangeTextField.bind(this);
     this.handleLoginSubmit = this.handleLoginSubmit.bind(this);
     this.handleRegistrationSubmit = this.handleRegistrationSubmit.bind(this);
@@ -85,19 +86,21 @@ class AppRoutes extends React.Component {
     this.handleRenewPassword = this.handleRenewPassword.bind(this);
   }
 
+  handleForceReload = () => { this.forceUpdate() }
+
   handleChangeTextField = name => event => { this.setState({ [name]: event.target.value }); };
 
   handleLoginSubmit = (e) => {  // login process
     e.preventDefault();
     this.login().then( () => { 
       
-        this.loadGallery().then( () => {
-            
-          sessionStorage.setItem("ll_user_email", this.state.email);
-          /* ZUNOTE: if this.state.renew -> change password process */
-          if(this.state.needToRenew) this.props.history.push('/signin'); 
-          else this.props.history.push('/');       
-        });
+        if(this.state.userLoaded)
+          this.loadGallery().then( () => {  
+            sessionStorage.setItem("ll_user_email", this.state.email);
+            /* ZUNOTE: if this.state.renew -> change password process */
+            if(this.state.needToRenew) this.props.history.push('/signin'); 
+            else this.props.history.push('/');       
+          });
     });
   }
 
@@ -199,7 +202,10 @@ class AppRoutes extends React.Component {
   getUser = async () => {
     console.log('getUser from email saved in sessionStorage');
     const response = await API.get('usersAPI', '/users/' + this.state.email);
-    if(response){
+    
+    //if(response){
+    if(!isEmpty(response)){
+
       //let holdingDays = Math.floor( (Date.parse(Date('Y-m-d')) - Date.parse(response[0].investDate)) / (1000 * 60 * 60 * 24));
       //let llScore = response[0].llToken * holdingDays;    
       this.setState({   
@@ -318,8 +324,7 @@ class AppRoutes extends React.Component {
           name: this.state.firstName + '\'s gallery',        
           creationDate: Date('Y-m-d'),
         }
-      });      
-      
+      });        
       console.log("Create Gallery response:\n" + JSON.stringify(response));
       return true;
       //this.loadArtworks(); //better later
@@ -394,18 +399,15 @@ class AppRoutes extends React.Component {
   }
 
   componentWillMount () {     
-
     var ll_user_email = sessionStorage.getItem("ll_user_email");
     if(ll_user_email) 
       this.setState({ email: ll_user_email }, function() { this.getUser(); });
-
     let dataURL = "http://blog.looklateral.com/wp-json/wp/v2/platformcategories?_embed"; 
     fetch (dataURL) 
       .then (res => res.json ()) 
       .then (res => { 
         this.setState ({ categories: res }); 
       }) 
-
     if(this.state.viewport.width !== document.documentElement.clientWidth){
       this.setState({
         viewport: {
@@ -439,30 +441,62 @@ class AppRoutes extends React.Component {
                                                               handleRegistrationSubmit={this.handleRegistrationSubmit}
                                                               {...props} /> } />
             
-            <Route exact path="/provenance" render={(props) => <Provenance userState={this.state} {...props} /> } />
-            <Route exact path="/fimart" render={(props) => <Fimart userState={this.state} {...props} /> } />
+            <Route exact path="/provenance" render={(props) => <Provenance 
+                                                              userState={this.state} 
+                                                              handleForceReload={this.handleForceReload}
+                                                              {...props} /> } />
+            
+            <Route exact path="/fimart" render={(props) => <Fimart 
+                                                              userState={this.state} 
+                                                              handleForceReload={this.handleForceReload}
+                                                              {...props} /> } />
             
 
-            <Route exact path="/users/:userId" render={(props) => <Profile userState={this.state} {...props} /> } />
+            <Route exact path="/users/:userId" render={(props) => <Profile 
+                                                              userState={this.state} 
+                                                              {...props} /> } />
+
             <Route exact path="/users/:userId/edit" render={(props) => <EditProfile 
                                                               userState={this.state} 
                                                               handleChangeTextField={this.handleChangeTextField}
                                                               handleRegistrationSubmit={this.handleRegistrationSubmit}
                                                               {...props} /> } />
-            <Route exact path="/users/:userId/financials" render={(props) => <MyFinancials userState={this.state} {...props} /> } />
+
+            <Route exact path="/users/:userId/financials" render={(props) => <MyFinancials 
+                                                              userState={this.state} 
+                                                              {...props} /> } />
+            
             {/*<Route path="/shops/:shopId" component={Shop}/>
             <PrivateRoute path="/seller/shops" component={MyShops}/>
             <PrivateRoute path="/seller/shop/new" component={NewShop}/>*/}
-            <Route exact path="/users/:userId/:galleryId" render={(props) => <MyArt userState={this.state} {...props} /> } />
+            <Route exact path="/users/:userId/:galleryId" render={(props) => <MyArt 
+                                                              userState={this.state} 
+                                                              handleForceReload={this.handleForceReload} 
+                                                              {...props} /> } />
             
     
             {/* deprecated - to keep for imamu file-loader <Route path="/upload-artwork" exact render={(props) => <UploadArtwork userState={this.state} {...props} /> } />*/}
-            {/*Private*/}<Route exact path="/product/new" render={(props) => <NewProduct userState={this.state} {...props} /> } />
-            <Route exact path="/product/:productId" render={(props) => <Product userState={this.state} {...props} /> } />
-            <Route exact path="/product/:productId/tokenize" render={(props) => <Tokenize userState={this.state} {...props} /> } />
-            {/*Private*/}<Route exact path="/product/:productId/edit" render={(props) => <EditProduct userState={this.state} {...props} /> } />
+            {/*Private*/}<Route exact path="/product/new" render={(props) => <NewProduct 
+                                                              userState={this.state} 
+                                                              {...props} /> } />
+            
+            <Route exact path="/product/:productId" render={(props) => <Product 
+                                                              userState={this.state} 
+                                                              handleForceReload={this.handleForceReload} 
+                                                              {...props} /> } />
+
+            <Route exact path="/product/:productId/tokenize" render={(props) => <Tokenize 
+                                                              userState={this.state} 
+                                                              handleForceReload={this.handleForceReload} 
+                                                              {...props} /> } />
+
+            {/*Private*/}<Route exact path="/product/:productId/edit" render={(props) => <EditProduct 
+                                                              userState={this.state} 
+                                                              handleForceReload={this.handleForceReload} 
+                                                              {...props} /> } />
             
             {/* <Route path="/seller/stripe/connect" component={StripeConnect}/> */}
+
             <Route component={Error404} />
           
           </Switch>
