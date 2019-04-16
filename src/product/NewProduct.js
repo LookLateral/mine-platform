@@ -15,6 +15,10 @@ import Icon from '@material-ui/core/Icon'
 //import {create} from './api-product.js'
 import {Link, Redirect} from 'react-router-dom'
 import { API } from 'aws-amplify';
+import { writeArtworkToChain } from './../bigchain/uploadArtwork'
+
+import * as util from 'util' // has no default export
+import { inspect } from 'util' // or directly
 
 
 const styles = theme => ({
@@ -59,6 +63,7 @@ class NewProduct extends Component {
       name: null,
       artist: null,
       description: null,
+      image: [],
       images: [],
       category: null,
       //quantity: 0,
@@ -67,7 +72,7 @@ class NewProduct extends Component {
       markings: null,
 
       creationDate: null,
-      txnId: null,
+      //txnId: null, // deprecated, txnId is the id of the artwork
       bucketId: null,
 
       viewable: false,
@@ -105,13 +110,35 @@ class NewProduct extends Component {
   handleCreateArtworkSubmit = (e) => {
     e.preventDefault();
 
-    // SIMONOTES: 
-    //need to call here initPaintingForUpload() to write to bigchain!!
-    //also, need to get back txSigned.id and write it to db
-    //also, need to save img and get bucketId
-    console.log('posting artwork');
-    this.createArtwork();
+   
+    console.log('uploading artwork');
+
+    let uploadDetails = {
+      owner: this.props.userState.userId,
+      name: this.state.name,
+      artist: this.state.artist,       
+    }
+
+    let uploadMetadata = {
+      image: this.state.images[0],
+      value_usd: this.state.price,
+      value_btc: null,
+      location: null,
+      size: this.state.size 
+    }
+    // ZUNOTE: need to get image!!
+
+    //console.log('bigchain data:\nuploadDetails:\n' + JSON.stringify(uploadDetails) + '\nuploadMetadata:\n' + JSON.stringify(uploadMetadata));
+    const txnUploadArtwork = writeArtworkToChain(uploadDetails, uploadMetadata)
+    this.setState({ id: txnUploadArtwork }, function () { console.log(this.state.id)})
+
+    // ZUNOTE: create bucket createBucket(txnUploadArtwork)
+
+    // ZUNOTE: uploade image in bucket
     
+    // set state: txnId, bucketPath, ...
+
+    // this.createArtwork();
   }
   
   createArtwork = async () => {
