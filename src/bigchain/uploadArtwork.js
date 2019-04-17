@@ -33,15 +33,15 @@ function writeArtworkToChain(uploadDetails, uploadMetadata) {
         alice.privateKey)
 
     conn.postTransactionCommit(txSigned)
-        .then(res => {
+        /*.then(res => {
             document.body.innerHTML += '<h3>Transaction created</h3>';
             document.body.innerHTML += txSigned.id
             
-        })
+        })*/
     return txSigned.id
 }
 
-function transferOwnership(txCreatedID, newOwner) {
+/*function transferOwnership(txCreatedID, newOwner) {
     // Get transaction payload by ID
     conn.getTransaction(txCreatedID)
         .then((txCreated) => {
@@ -72,6 +72,6 @@ function transferOwnership(txCreatedID, newOwner) {
             document.body.innerHTML += '<h3>Transfer Transaction created</h3>'
             document.body.innerHTML += res.id
         })
-}
+}*/
 
 export { writeArtworkToChain }

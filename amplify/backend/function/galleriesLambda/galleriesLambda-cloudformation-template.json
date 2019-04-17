@@ -64,7 +64,7 @@
 				"Timeout": "25",
 				"Code": {
 					"S3Bucket": "ll-platform-20190412100542-deployment",
-					"S3Key": "amplify-builds/galleriesLambda-1555082352-latest-build.zip"
+					"S3Key": "amplify-builds/galleriesLambda-1555428369-latest-build.zip"
 				}
 			}
 		},

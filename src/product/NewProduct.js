@@ -16,10 +16,9 @@ import Icon from '@material-ui/core/Icon'
 import {Link, Redirect} from 'react-router-dom'
 import { API } from 'aws-amplify';
 import { writeArtworkToChain } from './../bigchain/uploadArtwork'
+import { uploadFileInBucket } from './../bucket/manageBuckets.js'
 
-import * as util from 'util' // has no default export
-import { inspect } from 'util' // or directly
-
+import * as util from 'util'
 
 const styles = theme => ({
   card: {
@@ -73,7 +72,7 @@ class NewProduct extends Component {
 
       creationDate: null,
       //txnId: null, // deprecated, txnId is the id of the artwork
-      bucketId: null,
+      //bucketId: null,  // = to id
 
       viewable: false,
       tagged: false,
@@ -96,6 +95,8 @@ class NewProduct extends Component {
   }
 
   handleChange = name => event => {
+    //console.log('event:\n' + util.inspect(event))
+    console.log('event.target.files:\n' + util.inspect(event.target.files))
     const value = name === 'image'
       ? event.target.files[0]
       : event.target.value
@@ -109,9 +110,6 @@ class NewProduct extends Component {
 
   handleCreateArtworkSubmit = (e) => {
     e.preventDefault();
-
-   
-    console.log('uploading artwork');
 
     let uploadDetails = {
       owner: this.props.userState.userId,
@@ -130,15 +128,13 @@ class NewProduct extends Component {
 
     //console.log('bigchain data:\nuploadDetails:\n' + JSON.stringify(uploadDetails) + '\nuploadMetadata:\n' + JSON.stringify(uploadMetadata));
     const txnUploadArtwork = writeArtworkToChain(uploadDetails, uploadMetadata)
-    this.setState({ id: txnUploadArtwork }, function () { console.log(this.state.id)})
+    this.setState({ id: txnUploadArtwork }, function () { 
+      
+      uploadFileInBucket(txnUploadArtwork + '/picture/name.txt', 'file here')
 
-    // ZUNOTE: create bucket createBucket(txnUploadArtwork)
-
-    // ZUNOTE: uploade image in bucket
-    
-    // set state: txnId, bucketPath, ...
-
-    // this.createArtwork();
+      this.createArtwork();
+     
+    })
   }
   
   createArtwork = async () => {
@@ -148,7 +144,7 @@ class NewProduct extends Component {
     } else {              
       const data = await API.post('artworksAPI', '/artworks/', {
         body: {
-          id: null,
+          id: this.state.id,
           userId: this.props.userState.userId,
           name: this.state.name,
           artist: this.state.artist,
@@ -177,6 +173,7 @@ class NewProduct extends Component {
         this.setState({error: data.error})
       } else {
         console.log("Artwork creation response:\n" + JSON.stringify(data));
+        //console.log("Artwork creation state:\n" + JSON.stringify(this.state));
         this.setState({error: '', redirect: true})
       }
     }
@@ -193,10 +190,10 @@ class NewProduct extends Component {
           <Typography type="headline" component="h2" className={classes.title}>
             New Artwork
           </Typography><br/>
-          <input accept="image/*" onChange={this.handleChange('image')} className={classes.input} id="icon-button-file" type="file"/>
+          <input /*accept="image/*"*/ onChange={this.handleChange('image')} className={classes.input} id="icon-button-file" type="file"/>
           <label htmlFor="icon-button-file">
             <Button variant="contained" color="secondary" component="span">
-              Upload Photo
+              Upload Picture
               {/*<FileUpload/>*/}
             </Button>
           </label> <span className={classes.filename}>{this.state.image ? this.state.image.name : ''}</span><br/>

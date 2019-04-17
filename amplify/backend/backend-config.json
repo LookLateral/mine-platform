@@ -17,6 +17,10 @@
 		"artworksTable": {
 			"service": "DynamoDB",
 			"providerPlugin": "awscloudformation"
+		},
+		"s3bf25de7d": {
+			"service": "S3",
+			"providerPlugin": "awscloudformation"
 		}
 	},
 	"function": {
@@ -108,6 +112,12 @@
 					]
 				}
 			]
+		}
+	},
+	"auth": {
+		"cognito15276a35": {
+			"service": "Cognito",
+			"providerPlugin": "awscloudformation"
 		}
 	}
 }

@@ -237,9 +237,9 @@ class AppRoutes extends React.Component {
       },    
       function () { 
         //console.log('routes.js getUser:\n' + JSON.stringify(this.state)); 
-        this.loadGallery().then( response => {
-          if(response) {} //console.log("Gallery loaded on WillMount");
-          else console.log("error loading Gallery on WillMount");
+        this.loadGallery().then( /*response*/() => {
+          //if(response) {} //console.log("Gallery loaded on WillMount");
+          //else console.log("error loading Gallery on WillMount");
           let page = window.location.href.toString().split(window.location.host)[1];
           if( (page==='/signup' || page==='/profile' /* ZUNOTE: add others restricted pages.. */) && !this.state.userLogged ){
             this.props.history.push('/signin');
