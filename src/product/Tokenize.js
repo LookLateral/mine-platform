@@ -78,6 +78,7 @@ class Tokenize extends Component {
       tokenizationDate: null,
       
       viewable: false,
+      reqTag: false,
       tagged: false,
       reqTokenization: false,
       tokenized: false, // ==  onSale: false,
@@ -136,6 +137,7 @@ class Tokenize extends Component {
         tokenizationDate: data[0].tokenizationDate,
            
         viewable: data[0].viewable,
+        reqTag: data[0].reqTag,
         tagged: data[0].tagged,
         reqTokenization: data[0].reqTokenization,
         tokenized: data[0].tokenized,

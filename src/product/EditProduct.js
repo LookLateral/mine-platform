@@ -80,6 +80,7 @@ class EditProduct extends Component {
       tokenizationDate: null,
 
       viewable: false,
+      reqTag: false,
       tagged: false,
       reqTokenization: false,
       tokenized: false,
@@ -151,6 +152,7 @@ class EditProduct extends Component {
         tokenizationDate: data[0].tokenizationDate,
            
         viewable: data[0].viewable,
+        reqTag: data[0].reqTag,
         tagged: data[0].tagged,
         reqTokenization: data[0].reqTokenization,
         tokenized: data[0].tokenized,
@@ -184,6 +186,7 @@ class EditProduct extends Component {
           tokenizationDate: this.state.tokenizationDate,
           
           viewable: this.state.viewable,
+          reqTag: this.state.reqTag,
           tagged: this.state.tagged,
           reqTokenization: this.state.reqTokenization,
           tokenized: this.state.tokenized,

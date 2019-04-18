@@ -75,6 +75,7 @@ class NewProduct extends Component {
       tokenizationDate: null,
 
       viewable: false,
+      reqTag: false,
       tagged: false,
       reqTokenization: false,
       tokenized: false,
@@ -166,6 +167,7 @@ class NewProduct extends Component {
           tokenizationDate: null,
           
           viewable: this.state.viewable,
+          reqTag: false,
           tagged: false,
           reqTokenization: false,
           tokenized: false,

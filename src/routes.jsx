@@ -27,6 +27,10 @@ import Product from './product/Product'
 import Tokenize from './product/Tokenize'
 //import StripeConnect from './user/StripeConnect'
 
+import AdminProfile from './admin/AdminProfile'
+import AdminArtworks from './admin/AdminArtworks'
+import AdminUsers from './admin/AdminUsers'
+
 import aws_exports from './aws-exports';
 import Amplify, { /*Auth,*/ API } from 'aws-amplify';
 
@@ -497,6 +501,15 @@ class AppRoutes extends React.Component {
             
             {/* <Route path="/seller/stripe/connect" component={StripeConnect}/> */}
 
+
+
+            { /************************************** ADMIN ROUTES *********************************************** */ }
+
+            <Route exact path="/admin" render={(props) => <AdminProfile userState={this.state} {...props} /> } />
+
+            <Route path="/admin/artworks/" render={(props) => <AdminArtworks userState={this.state} handleForceReload={this.handleForceReload}  {...props} /> } />
+            <Route path="/admin/users/" render={(props) => <AdminUsers userState={this.state} {...props} /> } />
+
             <Route component={Error404} />
           
           </Switch>
@@ -506,6 +519,7 @@ class AppRoutes extends React.Component {
                     isOpen={this.state.sidebarOpened}
                     userLogged={ this.state.userLogged} 
                     firstName={ this.state.firstName} 
+                    email={ this.state.email} 
                     userType={ this.state.userType}
                     handleLogout={this.handleLogout}
                 /> 

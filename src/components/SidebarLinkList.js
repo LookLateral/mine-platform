@@ -12,10 +12,10 @@ const SidebarLinkList = (props) => {
     const { classes } = props; 
     return (
         <div className={classes.sidebarLinkList}>
-            { props.userLogged && props.userType === 3 ?
+            { props.userLogged && props.email.indexOf('@looklateral.com') > 0 /*props.userType === 3*/ ?
                 <SidebarSingleLink 
-                        name="SisAdmin Manager Art"
-                        linkto="/admin-dashboard"
+                        name="Admin Dashboard"
+                        linkto="/admin"
                         icon="user-shield"
                     />
             :
