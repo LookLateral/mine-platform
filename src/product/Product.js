@@ -159,17 +159,18 @@ class Product extends Component {
       description: null,
       images: [],
       category: null,
-      //quantity: 0,
       price: 0,
-      size: null,
-      markings: null,
+      dimensions: null,
+      year: null,
+      location: null,
 
       creationDate: null,
-      txnId: null,
-      bucketId: null,
+      reqTokenizationDate: null,
+      tokenizationDate: null,
       
       viewable: false,
       tagged: false,
+      reqTokenization: false,
       tokenized: false,
       onSale: false,
       buyback: false,
@@ -195,17 +196,18 @@ class Product extends Component {
         description: data[0].description,
         images: [],
         category: data[0].category,
-        //quantity: data[0].quantity,
         price: data[0].price,
-        size: data[0].size,
-        markings: data[0].markings,
+        dimensions: data[0].dimensions,
+        year: data[0].year,
+        location: data[0].location,
 
         creationDate: data[0].creationDate,
-        txnId: data[0].txnId,
-        bucketId: data[0].bucketId || null,
+        reqTokenizationDate: data[0].reqTokenizationDate,
+        tokenizationDate: data[0].tokenizationDate,
            
         viewable: data[0].viewable,
         tagged: data[0].tagged,
+        reqTokenization: data[0].reqTokenization,
         tokenized: data[0].tokenized,
         onSale: data[0].onSale,
         buyback: data[0].buyback 
@@ -248,7 +250,9 @@ class Product extends Component {
                   <div type="subheading" className={classes.subheading}>
                     <div className={classes.artist}>{this.state.artist}</div><br/>
                     <div className={classes.title}>{this.state.name}</div><br/>
-                    <div className={classes.price}>Estimate: $ {this.state.price}</div>
+                    { this.state.price >0 && (
+                      <div className={classes.price}>Estimate: $ {this.state.price}</div>
+                    )}
                     <div className={classes.divider}></div>
                     <div style={{marginBottom: '20px'}}>
                       <span className={classes.fractPic}><img src={fractPic} alt="0%" /></span>
@@ -277,15 +281,26 @@ class Product extends Component {
                   <CardContent>
                     <Grid item xs={7} sm={7} className={classes.boxDetail +' '+ classes.boxLeft}>
                       <div className={classes.titleInfo}>Artwork details</div>
-                      <div className={classes.textInfo}>
-                        <span style={{fontWeight:'bold'}}>Size: </span> {this.state.size}
-                      </div>
-                      <div className={classes.textInfo}>
-                        <span style={{fontWeight:'bold'}}>Markings: </span> {this.state.markings}
-                      </div>
-                      <div className={classes.textInfo}>
-                        <span style={{fontWeight:'bold'}}>Description: </span> {this.state.description}
-                      </div>  
+                      { /*this.state.dimensions &&*/ (
+                        <div className={classes.textInfo}>
+                          <span style={{fontWeight:'bold'}}>Dimensions: </span> {this.state.dimensions}
+                        </div>
+                      )}
+                      { /*this.state.year &&*/ (
+                        <div className={classes.textInfo}>
+                          <span style={{fontWeight:'bold'}}>Year: </span> {this.state.year}
+                        </div>
+                      )}
+                      { /*this.state.location &&*/ (
+                        <div className={classes.textInfo}>
+                          <span style={{fontWeight:'bold'}}>Location: </span> {this.state.location}
+                        </div>
+                      )}
+                      { /*this.state.description &&*/ (
+                        <div className={classes.textInfo}>
+                          <span style={{fontWeight:'bold'}}>Description: </span> {this.state.description}
+                        </div>  
+                      )}
                     </Grid>
 
                     <Grid item xs={5} sm={5} className={classes.boxDetail}>
@@ -311,8 +326,7 @@ class Product extends Component {
                   
                     {/* SIMONOTE: these buttons only if user=owner; also what path?? and they are visible if the owner didn't request that */}
                     <div style={{marginTop:20}}>
-                      <Link to={"/"}>{/* SIMONOTE: missing link */}
-
+                      <Link to={"/"}>{/* SIMONOTE: missing link, add popup: "Tag requested!" */}
                         <Button 
                             className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround}>Ask TAG</Button>
                         </Link>
@@ -330,7 +344,7 @@ class Product extends Component {
                         </Link>
                       </div>
                       <div style={{marginTop:10}}>
-                      <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link */}
+                      <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link, add popup: "Tokenization requested!" */}
                         <span style={{fontWeight:'bold'}}>TOKENIZE:</span> click here for the how-to
                         </Link>
                       </div>

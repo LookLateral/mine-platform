@@ -11,6 +11,7 @@
     "@material-ui/icons": "^3.0.2",
     "aws-amplify": "^1.1.13",
     "aws-amplify-react": "^2.1.7",
+    "aws-sdk": "^2.438.0",
     "axios": "^0.18.0",
     "bigchaindb-driver": "^4.1.0",
     "bip39": "^3.0.1",

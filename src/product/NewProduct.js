@@ -62,20 +62,21 @@ class NewProduct extends Component {
       name: null,
       artist: null,
       description: null,
-      image: [],
+      image: {},
       images: [],
       category: null,
-      //quantity: 0,
       price: 0,
-      size: null,
-      markings: null,
-
+      dimensions: null,
+      year: null,
+      location: null,
+      
       creationDate: null,
-      //txnId: null, // deprecated, txnId is the id of the artwork
-      //bucketId: null,  // = to id
+      reqTokenizationDate: null,
+      tokenizationDate: null,
 
       viewable: false,
       tagged: false,
+      reqTokenization: false,
       tokenized: false,
       onSale: false,
       buyback: false,
@@ -96,12 +97,15 @@ class NewProduct extends Component {
 
   handleChange = name => event => {
     //console.log('event:\n' + util.inspect(event))
-    console.log('event.target.files:\n' + util.inspect(event.target.files))
+    console.log('event.target.files:\n' + util.inspect(event.target.files[0]))
     const value = name === 'image'
       ? event.target.files[0]
       : event.target.value
     this.productData.set(name, value)
-    this.setState({ [name]: value })
+    this.setState({ [name]: value }, 
+    function() {
+      console.log('state after handleChange:\n' + JSON.stringify(this.state.image.name)) 
+    })
   }
 
   handleCheckbox = name => event => {
@@ -114,15 +118,16 @@ class NewProduct extends Component {
     let uploadDetails = {
       owner: this.props.userState.userId,
       name: this.state.name,
-      artist: this.state.artist,       
+      artist: this.state.artist,
+      year: this.state.year,    
+      dimensions: this.state.dimensions,   
     }
 
     let uploadMetadata = {
       image: this.state.images[0],
+      location: this.state.location,
       value_usd: this.state.price,
       value_btc: null,
-      location: null,
-      size: this.state.size 
     }
     // ZUNOTE: need to get image!!
 
@@ -151,21 +156,21 @@ class NewProduct extends Component {
           description: this.state.description,
           images: [],
           category: this.state.category,
-          //quantity: this.state.quantity,
           price: this.state.price,
-          size: this.state.size,
-          markings: this.state.markings,
+          dimensions: this.state.dimensions,
+          year: this.state.year,
+          location: this.state.location,
           
           creationDate: Date('Y-m-d'),
-          txnId: null,
-          bucketId: null,
+          reqTokenizationDate: null,
+          tokenizationDate: null,
           
           viewable: this.state.viewable,
           tagged: false,
+          reqTokenization: false,
           tokenized: false,
           onSale: false,
           buyback: false,
-          // ZUNOTE: enough?  
         }
       });   
       
@@ -184,22 +189,24 @@ class NewProduct extends Component {
       return (<Redirect to={"/users/" + this.props.userState.userId + "/" + this.props.userState.galleryId}/>)
     }
     const {classes} = this.props
+    //if(this.state.image) console.log('this.state.image:\n' + JSON.stringify(this.state.image))
     return (<div>
       <Card className={classes.card}>
         <CardContent>
           <Typography type="headline" component="h2" className={classes.title}>
             New Artwork
           </Typography><br/>
-          <input /*accept="image/*"*/ onChange={this.handleChange('image')} className={classes.input} id="icon-button-file" type="file"/>
+          <input accept="image/*" onChange={this.handleChange('image')} className={classes.input} id="icon-button-file" type="file" />
           <label htmlFor="icon-button-file">
             <Button variant="contained" color="secondary" component="span">
               Upload Picture
               {/*<FileUpload/>*/}
             </Button>
-          </label> <span className={classes.filename}>{this.state.image ? this.state.image.name : ''}</span><br/>
+          </label> <span className={classes.filename}>{ this.state.image ? this.state.image.name : ''}</span><br/>
           <TextField 
                 id="name" 
-                label="Name" 
+                label="Name"
+                required 
                 className={classes.textField} 
                 value={this.state.name || ""} 
                 onChange={this.handleChange('name')} 
@@ -207,6 +214,7 @@ class NewProduct extends Component {
           <TextField 
                 id="artist" 
                 label="Artist" 
+                required
                 className={classes.textField} 
                 value={this.state.artist || ""} 
                 onChange={this.handleChange('artist')} 
@@ -220,14 +228,13 @@ class NewProduct extends Component {
                 onChange={this.handleChange('description')} 
                 className={classes.textField}
                 margin="normal"/><br/>
-          <TextField 
+          {/*<TextField 
                 id="category" 
                 label="Category" 
                 className={classes.textField} 
                 value={this.state.category || ""} 
                 onChange={this.handleChange('category')} 
-                margin="normal"/><br/>
-          {/*
+                margin="normal"/><br/>        
           <TextField 
                 id="quantity" 
                 label="Quantity (field to be removed)" 
@@ -238,26 +245,31 @@ class NewProduct extends Component {
                 margin="normal"/><br/>*/}
           <TextField 
                 id="price" 
-                label="Price" 
+                label="Suggested Price" 
                 className={classes.textField} 
                 value={this.state.price !== 0 ? this.state.price : ""} 
                 onChange={this.handleChange('price')} 
                 type="number" 
                 margin="normal"/><br/>
             <TextField 
-                id="size" 
-                label="Size" 
+                id="dimensions" 
+                label="Dimensions" 
                 className={classes.textField} 
-                value={this.state.size || ""} 
-                onChange={this.handleChange('size')} 
+                value={this.state.dimensions || ""} 
+                onChange={this.handleChange('dimensions')} 
                 margin="normal"/><br/>
             <TextField
-                id="markings"
-                label="Markings" 
-                multiline
-                rows="2"
-                value={this.state.markings || ""}
-                onChange={this.handleChange('markings')} 
+                id="location"
+                label="Location" 
+                value={this.state.location || ""}
+                onChange={this.handleChange('location')} 
+                className={classes.textField}
+                margin="normal"/><br/>
+            <TextField
+                id="year"
+                label="Year" 
+                value={this.state.year || ""}
+                onChange={this.handleChange('year')} 
                 className={classes.textField}
                 margin="normal"/><br/>
 

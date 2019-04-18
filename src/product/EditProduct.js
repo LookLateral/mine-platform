@@ -70,17 +70,18 @@ class EditProduct extends Component {
       description: null,
       images: [],
       category: null,
-      //quantity: 0,
       price: 0,
-      size: null,
-      markings: null,
+      dimensions: null,
+      year: null,
+      location: null,
       
       creationDate: null,
-      txnId: null,
-      bucketId: null,
+      reqTokenizationDate: null,
+      tokenizationDate: null,
 
       viewable: false,
       tagged: false,
+      reqTokenization: false,
       tokenized: false,
       onSale: false,
       buyback: false,
@@ -120,9 +121,7 @@ class EditProduct extends Component {
   handleUpdateArtworkSubmit = (e) => {
     e.preventDefault();
 
-    // SIMONOTES: 
-    //need to call here initPaintingForUpload() to write to bigchain!!
-    //also, need to get back txSigned.id and write it to db
+    // SIMONOTES: need to update old metadata in txn???
     console.log('updating artwork');
     this.updateArtwork();
     
@@ -142,20 +141,21 @@ class EditProduct extends Component {
         description: data[0].description,
         images: [],
         category: data[0].category,
-        //quantity: data[0].quantity,
         price: data[0].price,
-        size: data[0].size,
-        markings: data[0].markings,
+        dimensions: data[0].dimensions,
+        year: data[0].year,
+        location: data[0].location,
 
         creationDate: data[0].creationDate,
-        txnId: data[0].txnId,
-        bucketId: data[0].bucketId || null,
+        reqTokenizationDate: data[0].reqTokenizationDate,
+        tokenizationDate: data[0].tokenizationDate,
            
         viewable: data[0].viewable,
         tagged: data[0].tagged,
+        reqTokenization: data[0].reqTokenization,
         tokenized: data[0].tokenized,
         onSale: data[0].onSale,
-        buyback: data[0].buyback
+        buyback: data[0].buyback 
       })
     }
   }
@@ -174,17 +174,18 @@ class EditProduct extends Component {
           description: this.state.description,
           images: [],
           category: this.state.category,
-          //quantity: this.state.quantity,
           price: this.state.price,
-          size: this.state.size,
-          markings: this.state.markings,
+          dimensions: this.state.dimensions,
+          year: this.state.year,
+          location: this.state.location,
 
           creationDate: this.state.creationDate,
-          txnId: this.state.txnId,
-          bucketId: this.state.bucketId,
+          reqTokenizationDate: this.state.reqTokenizationDate,
+          tokenizationDate: this.state.tokenizationDate,
           
           viewable: this.state.viewable,
           tagged: this.state.tagged,
+          reqTokenization: this.state.reqTokenization,
           tokenized: this.state.tokenized,
           onSale: this.state.onSale,
           buyback: this.state.buyback
@@ -247,14 +248,13 @@ class EditProduct extends Component {
                 onChange={this.handleChange('description')} 
                 className={classes.textField}
                 margin="normal"/><br/>
-          <TextField 
+          {/*<TextField 
                 id="category" 
                 label="Category" 
                 className={classes.textField} 
                 value={this.state.category || ""} 
                 onChange={this.handleChange('category')} 
-                margin="normal"/><br/>
-          {/*
+                margin="normal"/><br/>        
           <TextField 
                 id="quantity" 
                 label="Quantity (field to be removed)" 
@@ -265,26 +265,31 @@ class EditProduct extends Component {
                 margin="normal"/><br/>*/}
           <TextField 
                 id="price" 
-                label="Price" 
+                label="Suggested Price" 
                 className={classes.textField} 
                 value={this.state.price !== 0 ? this.state.price : ""} 
                 onChange={this.handleChange('price')} 
                 type="number" 
                 margin="normal"/><br/>
             <TextField 
-                id="size" 
-                label="Size" 
+                id="dimensions" 
+                label="Dimensions" 
                 className={classes.textField} 
-                value={this.state.size || ""} 
-                onChange={this.handleChange('size')} 
+                value={this.state.dimensions || ""} 
+                onChange={this.handleChange('dimensions')} 
                 margin="normal"/><br/>
             <TextField
-                id="markings"
-                label="Markings" 
-                multiline
-                rows="2"
-                value={this.state.markings || ""}
-                onChange={this.handleChange('markings')} 
+                id="location"
+                label="Location" 
+                value={this.state.location || ""}
+                onChange={this.handleChange('location')} 
+                className={classes.textField}
+                margin="normal"/><br/>
+            <TextField
+                id="year"
+                label="Year" 
+                value={this.state.year || ""}
+                onChange={this.handleChange('year')} 
                 className={classes.textField}
                 margin="normal"/><br/>
 

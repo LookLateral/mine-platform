@@ -20,7 +20,7 @@ function writeArtworkToChain(uploadDetails, uploadMetadata) {
             value: {
                 image: uploadMetadata.image,
                 location: uploadMetadata.location,
-                size: uploadMetadata.size,
+                //dimensions: uploadMetadata.dimensions,
                 value_usd: uploadMetadata.value_usd,
                 value_btc: uploadMetadata.value_btc,
             }

@@ -68,29 +68,31 @@ class Tokenize extends Component {
       description: null,
       images: [],
       category: null,
-      //quantity: 0,
       price: 0,
-      size: null,
-      markings: null,
+      dimensions: null,
+      year: null,
+      location: null,
       
       creationDate: null,
-      txnId: null,
-      bucketId: null,
+      reqTokenizationDate: null,
+      tokenizationDate: null,
       
       viewable: false,
       tagged: false,
-      tokenized: false,
+      reqTokenization: false,
+      tokenized: false, // ==  onSale: false,
       onSale: false,
       buyback: false,
 
       // new
       artworkId: null,
       ownerId: null,
-      tokenqty: null,
-      tokenName: null,
+      tokenqty: 1000000, //const
+      tokenKept: 0, //% to keep
+      tokenForSale: 0, //% to sell
+      tokenName: null, //
+      tokenSuggestedValue: null,
       tokenValue: null,
-      tokenizationDate: null,
-      //percToKeep: null,
 
       redirect: false,
       error: ''
@@ -117,27 +119,28 @@ class Tokenize extends Component {
       alert('error loading artwork:\n' + JSON.stringify(data.error))
     } else {
       this.setState({ 
-        artworkId: data[0].id,
+        id: data[0].id,
         userId: data[0].userId,
         name: data[0].name,
         artist: data[0].artist,
         description: data[0].description,
         images: [],
         category: data[0].category,
-        //quantity: data[0].quantity,
         price: data[0].price,
-        size: data[0].size,
-        markings: data[0].markings,
+        dimensions: data[0].dimensions,
+        year: data[0].year,
+        location: data[0].location,
 
         creationDate: data[0].creationDate,
-        txnId: data[0].txnId,
-        bucketId: data[0].bucketId || null,
+        reqTokenizationDate: data[0].reqTokenizationDate,
+        tokenizationDate: data[0].tokenizationDate,
            
         viewable: data[0].viewable,
         tagged: data[0].tagged,
+        reqTokenization: data[0].reqTokenization,
         tokenized: data[0].tokenized,
         onSale: data[0].onSale,
-        buyback: data[0].buyback
+        buyback: data[0].buyback 
       })
     }
   }
@@ -158,9 +161,8 @@ class Tokenize extends Component {
     e.preventDefault();
 
     // SIMONOTES: 
-    //need to call here initPaintingForUpload() to write to bigchain!!
-    //initPaintingForUpload(this.state.id, this.state.name, this.state.artist, jwt.user._id, this.state.tokenqty, this.state.price, (this.state.price/2000) );
-    //also, need to get back txSigned.id and write it to db
+    //need to call here TokenLaunch to write to bigchain!!, ... then ... don't know
+
     console.log('tokenizing artwork');
     this.tokenizeArtwork();
   }
@@ -241,7 +243,7 @@ class Tokenize extends Component {
           <TextField 
                 readOnly
                 id="price" 
-                label="Price" 
+                label="Suggested Price" 
                 className={classes.textField} 
                 value={this.state.price !== 0 ? this.state.price : ""} 
                 onChange={this.handleChange('price')} 
@@ -255,11 +257,29 @@ class Tokenize extends Component {
                 onChange={this.handleChange('tokenName')} 
                 margin="normal"/><br/>
             <TextField 
+                readOnly
                 id="tokenqty" 
                 label="Token Qty" 
                 className={classes.textField} 
                 value={this.state.tokenqty || ""} 
                 onChange={this.handleChange('tokenqty')} 
+                type="number" 
+                margin="normal"/><br/>
+            <TextField 
+                readOnly
+                id="tokenqty" 
+                label="Token Qty" 
+                className={classes.textField} 
+                value={this.state.tokenqty || ""} 
+                onChange={this.handleChange('tokenqty')} 
+                type="number" 
+                margin="normal"/><br/>
+            <TextField 
+                id="tokenKept" 
+                label="Percentage of tokens to Kept" 
+                className={classes.textField} 
+                value={this.state.tokenKept || ""} 
+                onChange={this.handleChange('tokenKept')} 
                 type="number" 
                 margin="normal"/><br/>
             <FormControlLabel
