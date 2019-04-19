@@ -61,7 +61,7 @@ class Tokenize extends Component {
   constructor({match}) {
     super()
     this.state = {
-      //id: null,
+      id: null,
       userId: null,
       name: null,
       artist: null,
@@ -74,26 +74,28 @@ class Tokenize extends Component {
       location: null,
       
       creationDate: null,
-      reqTokenizationDate: null,
-      tokenizationDate: null,
-      
       viewable: false,
-      reqTag: false,
-      tagged: false,
-      reqTokenization: false,
-      tokenized: false, // ==  onSale: false,
-      onSale: false,
-      buyback: false,
 
-      // new
-      artworkId: null,
-      ownerId: null,
+      reqTag: false,
+      reqTagDate: null,
+      tagSent: false,
+      tagSentDate: null,
+      reqVal: false,
+      reqValDate: null,
+      tagged: false,
+      tagDate: null,
+
+      reqTokenization: false,
+      reqTokenizationDate: null,
       tokenqty: 1000000, //const
       tokenKept: 0, //% to keep
       tokenForSale: 0, //% to sell
       tokenName: null, //
       tokenSuggestedValue: null,
       tokenValue: null,
+      tokenized: false, // = onSale
+      tokenizationDate: null,
+      buyback: false,
 
       redirect: false,
       error: ''
@@ -133,16 +135,28 @@ class Tokenize extends Component {
         location: data[0].location,
 
         creationDate: data[0].creationDate,
-        reqTokenizationDate: data[0].reqTokenizationDate,
-        tokenizationDate: data[0].tokenizationDate,
-           
         viewable: data[0].viewable,
-        reqTag: data[0].reqTag,
-        tagged: data[0].tagged,
-        reqTokenization: data[0].reqTokenization,
-        tokenized: data[0].tokenized,
-        onSale: data[0].onSale,
-        buyback: data[0].buyback 
+
+        reqTag: data[0].reqTag || false,
+        reqTagDate: data[0].reqTagDate || null,
+        tagSent: data[0].tagSent || false,
+        tagSentDate: data[0].tagSentDate || null,
+        reqVal: data[0].reqVal || false,
+        reqValDate: data[0].reqValDate || null,
+        tagged: data[0].tagged || false,
+        tagDate: data[0].tagDate || null,
+
+        reqTokenization: data[0].reqTokenization || false,
+        reqTokenizationDate: data[0].reqTokenizationDate || null,
+        tokenqty: data[0].tokenqty || 1000000,
+        tokenKept: data[0].tokenKept || 0, 
+        tokenForSale: data[0].tokenForSale || null,
+        tokenName: data[0].tokenName || null, 
+        tokenSuggestedValue: data[0].tokenSuggestedValue || null,
+        tokenValue: data[0].tokenValue || null,
+        tokenized: data[0].tokenized || false,
+        tokenizationDate: data[0].tokenizationDate || null,
+        buyback: data[0].buyback || false  
       })
     }
   }
@@ -174,23 +188,43 @@ class Tokenize extends Component {
       alert('Please complete all required fields'); 
       return false;
     } else {       
-      /*const data = await API.post('fractsAPI', '/fracts/', {
+      const data = await API.post('artworksAPI', '/artworks/', {
         body: {
-          id: null, // id fract
+          id: this.state.id,
+          userId: this.state.userId,
+          name: this.state.name,
+          artist: this.state.artist,
+          description: this.state.description,
+          images: [],
+          category: this.state.category,
+          price: this.state.price,
+          dimensions: this.state.dimensions,
+          year: this.state.year,
+          location: this.state.location,
+
+          creationDate: this.state.creationDate,
+          viewable: this.state.viewable,
           
-          // new for fracts
-          artworkId: this.state.artworkId,
-          ownerId: this.state.userId,
+          reqTag: this.state.reqTag,
+          reqTagDate: this.state.reqTagDate,
+          tagSent: this.state.tagSent,
+          tagSentDate: this.state.tagSentDate,
+          reqVal: this.state.reqVal,
+          reqValDate: this.state.reqValDate,
+          tagged: this.state.tagged,
+          tagDate: this.state.tagDate,
+
+          reqTokenization: true,
+          reqTokenizationDate: new Date('Y-m-d'),
           tokenqty: this.state.tokenqty,
-          tokenName: this.state.tokenName,
-          tokenValue: this.state.price/this.state.tokenqty,
-          tokenizationDate: new Date('Y-m-d'),
-          buyback: this.state.buyback,
-          
-          //old from artwork, ??
-          //userId: this.state.userId, // swapping with ownerId
-          creationDate: this.state.creationDate,       
-          bucketId: this.state.bucketId,       
+          tokenKept: this.state.tokenKept, 
+          tokenForSale: this.state.tokenForSale,
+          tokenName: this.state.tokenName, 
+          tokenSuggestedValue: this.state.tokenSuggestedValue,
+          tokenValue: this.state.tokenValue,
+          tokenized: this.state.tokenized,
+          tokenizationDate: this.state.tokenizationDate,
+          buyback: this.state.buyback   
           
         }
       });   
@@ -200,8 +234,9 @@ class Tokenize extends Component {
       } else {
         console.log("Artwork tokenization response:\n" + JSON.stringify(data));
         this.setState({error: '', redirect: true})
-      }*/
-      alert('Need to implement!')
+      }
+      // popup: request sent
+
       this.setState({error: '', redirect: true})
     }
   }
@@ -215,7 +250,7 @@ class Tokenize extends Component {
     const imageUrl = EmptyPic // ZUNOTE: need to fix
     
           if (this.state.redirect) {
-      return (<Redirect to={'/product/' + this.state.artworkId }/>)
+      return (<Redirect to={'/product/' + this.state.id }/>)
     }
     const {classes} = this.props
     return (<div>
@@ -267,15 +302,7 @@ class Tokenize extends Component {
                 onChange={this.handleChange('tokenqty')} 
                 type="number" 
                 margin="normal"/><br/>
-            <TextField 
-                readOnly
-                id="tokenqty" 
-                label="Token Qty" 
-                className={classes.textField} 
-                value={this.state.tokenqty || ""} 
-                onChange={this.handleChange('tokenqty')} 
-                type="number" 
-                margin="normal"/><br/>
+            
             <TextField 
                 id="tokenKept" 
                 label="Percentage of tokens to Kept" 

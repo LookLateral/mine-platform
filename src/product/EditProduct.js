@@ -76,15 +76,27 @@ class EditProduct extends Component {
       location: null,
       
       creationDate: null,
-      reqTokenizationDate: null,
-      tokenizationDate: null,
-
       viewable: false,
+
       reqTag: false,
+      reqTagDate: null,
+      tagSent: false,
+      tagSentDate: false,
+      reqVal: false,
+      reqValDate: null,
       tagged: false,
+      tagDate: null,
+
       reqTokenization: false,
-      tokenized: false,
-      onSale: false,
+      reqTokenizationDate: null,
+      tokenqty: 1000000, //const
+      tokenKept: 0, //% to keep
+      tokenForSale: 0, //% to sell
+      tokenName: null, //
+      tokenSuggestedValue: null,
+      tokenValue: null,
+      tokenized: false, // = onSale
+      tokenizationDate: null,
       buyback: false,
 
       redirect: false,
@@ -148,16 +160,28 @@ class EditProduct extends Component {
         location: data[0].location,
 
         creationDate: data[0].creationDate,
-        reqTokenizationDate: data[0].reqTokenizationDate,
-        tokenizationDate: data[0].tokenizationDate,
-           
         viewable: data[0].viewable,
-        reqTag: data[0].reqTag,
-        tagged: data[0].tagged,
-        reqTokenization: data[0].reqTokenization,
-        tokenized: data[0].tokenized,
-        onSale: data[0].onSale,
-        buyback: data[0].buyback 
+
+        reqTag: data[0].reqTag || false,
+        reqTagDate: data[0].reqTagDate || null,
+        tagSent: data[0].tagSent || false,
+        tagSentDate: data[0].tagSentDate || null,
+        reqVal: data[0].reqVal || false,
+        reqValDate: data[0].reqValDate || null,
+        tagged: data[0].tagged || false,
+        tagDate: data[0].tagDate || null,
+
+        reqTokenization: data[0].reqTokenization || false,
+        reqTokenizationDate: data[0].reqTokenizationDate || null,
+        tokenqty: data[0].tokenqty || 1000000,
+        tokenKept: data[0].tokenKept || 0, 
+        tokenForSale: data[0].tokenForSale || null,
+        tokenName: data[0].tokenName || null, 
+        tokenSuggestedValue: data[0].tokenSuggestedValue || null,
+        tokenValue: data[0].tokenValue || null,
+        tokenized: data[0].tokenized || false,
+        tokenizationDate: data[0].tokenizationDate || null,
+        buyback: data[0].buyback || false   
       })
     }
   }
@@ -182,16 +206,28 @@ class EditProduct extends Component {
           location: this.state.location,
 
           creationDate: this.state.creationDate,
-          reqTokenizationDate: this.state.reqTokenizationDate,
-          tokenizationDate: this.state.tokenizationDate,
-          
           viewable: this.state.viewable,
+          
           reqTag: this.state.reqTag,
+          reqTagDate: this.state.reqTagDate,
+          tagSent: this.state.tagSent,
+          tagSentDate: this.state.tagSentDate,
+          reqVal: this.state.reqVal,
+          reqValDate: this.state.reqValDate,
           tagged: this.state.tagged,
+          tagDate: this.state.tagDate,
+
           reqTokenization: this.state.reqTokenization,
+          reqTokenizationDate: this.state.reqTokenizationDate,
+          tokenqty: this.state.tokenqty,
+          tokenKept: this.state.tokenKept, 
+          tokenForSale: this.state.tokenForSale,
+          tokenName: this.state.tokenName, 
+          tokenSuggestedValue: this.state.tokenSuggestedValue,
+          tokenValue: this.state.tokenValue,
           tokenized: this.state.tokenized,
-          onSale: this.state.onSale,
-          buyback: this.state.buyback
+          tokenizationDate: this.state.tokenizationDate,
+          buyback: this.state.buyback   
         }
       });   
       
@@ -251,14 +287,14 @@ class EditProduct extends Component {
                 onChange={this.handleChange('description')} 
                 className={classes.textField}
                 margin="normal"/><br/>
-          {/*<TextField 
+          <TextField 
                 id="category" 
                 label="Category" 
                 className={classes.textField} 
                 value={this.state.category || ""} 
                 onChange={this.handleChange('category')} 
                 margin="normal"/><br/>        
-          <TextField 
+          {/*<TextField 
                 id="quantity" 
                 label="Quantity (field to be removed)" 
                 className={classes.textField} 

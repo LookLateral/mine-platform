@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles';
-import { Redirect, Link } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 import Products from './../product/Products'
 import Card from '@material-ui/core/Card'
 import Typography from '@material-ui/core/Typography'
@@ -71,17 +71,20 @@ class AdminArtworks extends Component {
       let loadProducts = data.data.filter((product, index) => {       
 
         if(this.state.url === 'all') return true
-        else if(this.state.url === 'tag') return product.reqTag === true
-        else if(this.state.url === 'tokenizations') return product.reqTokenization === true
+        else if(this.state.url === 'tag') return product.reqTag === true && product.reqVal === false && product.tagged === false
+        else if(this.state.url === 'val') return product.reqTag === true && product.reqVal === true && product.tagged === false
+        else if(this.state.url === 'tagged') return product.tagged === true
+        else if(this.state.url === 'tokenizations') return product.reqTokenization === true && product.tokenized === false
         else if(this.state.url === 'tokenized') return product.tokenized === true 
-      
+        
+        return false
       });
       this.setState({ products: loadProducts })
     }
   }
 
   componentDidMount() {
-    if (!this.props.userState.userLogged || this.props.userState.email.indexOf('@looklateral.com') === 0)  { 
+    if (!this.props.userState.userLogged || this.props.userState.userType !== 3)  { 
       return <Redirect to='/signin' />
     }
     this.props.handleForceReload()
@@ -92,6 +95,8 @@ class AdminArtworks extends Component {
     let title = null
     if(url === 'all') title = "Uploaded Artworks"
     else if(url === 'tag') title = "Tag Requests" 
+    else if(url === 'val') title = "Validation Requests" 
+    else if(url === 'tagged') title = "Tagged Artworks" 
     else if(url === 'tokenizations') title = "Tokenization Requests" 
     else if(url === 'tokenized') title = "Tokenized Artworks" 
     else this.props.history.push('/admin');    

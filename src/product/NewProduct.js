@@ -18,7 +18,7 @@ import { API } from 'aws-amplify';
 import { writeArtworkToChain } from './../bigchain/uploadArtwork'
 import { uploadFileInBucket } from './../bucket/manageBuckets.js'
 
-import * as util from 'util'
+//import * as util from 'util'
 
 const styles = theme => ({
   card: {
@@ -62,7 +62,6 @@ class NewProduct extends Component {
       name: null,
       artist: null,
       description: null,
-      image: {},
       images: [],
       category: null,
       price: 0,
@@ -71,15 +70,27 @@ class NewProduct extends Component {
       location: null,
       
       creationDate: null,
-      reqTokenizationDate: null,
-      tokenizationDate: null,
-
       viewable: false,
+
       reqTag: false,
+      reqTagDate: null,
+      tagSent: false,
+      tagSentDate: false,
+      reqVal: false,
+      reqValDate: null,
       tagged: false,
+      tagDate: null,
+
       reqTokenization: false,
-      tokenized: false,
-      onSale: false,
+      reqTokenizationDate: null,
+      tokenqty: 1000000, //const
+      tokenKept: 0, //% to keep
+      tokenForSale: 0, //% to sell
+      tokenName: null, //
+      tokenSuggestedValue: null,
+      tokenValue: null,
+      tokenized: false, // = onSale
+      tokenizationDate: null,
       buyback: false,
 
       redirect: false,
@@ -98,15 +109,15 @@ class NewProduct extends Component {
 
   handleChange = name => event => {
     //console.log('event:\n' + util.inspect(event))
-    console.log('event.target.files:\n' + util.inspect(event.target.files[0]))
+    //console.log('event.target.files:\n' + util.inspect(event.target.files[0]))
     const value = name === 'image'
       ? event.target.files[0]
       : event.target.value
     this.productData.set(name, value)
-    this.setState({ [name]: value }, 
+    this.setState({ [name]: value }/*, 
     function() {
       console.log('state after handleChange:\n' + JSON.stringify(this.state.image.name)) 
-    })
+    }*/)
   }
 
   handleCheckbox = name => event => {
@@ -160,19 +171,30 @@ class NewProduct extends Component {
           price: this.state.price,
           dimensions: this.state.dimensions,
           year: this.state.year,
-          location: this.state.location,
-          
-          creationDate: Date('Y-m-d'),
-          reqTokenizationDate: null,
-          tokenizationDate: null,
-          
+          location: this.state.location,      
+          creationDate: Date('Y-m-d'),     
           viewable: this.state.viewable,
-          reqTag: false,
-          tagged: false,
-          reqTokenization: false,
-          tokenized: false,
-          onSale: false,
-          buyback: false,
+
+          reqTag: this.state.reqTag,
+          reqTagDate: this.state.reqTagDate,
+          tagSent: this.state.tagSent,
+          tagSentDate: this.state.tagSentDate,
+          reqVal: this.state.reqVal,
+          reqValDate: this.state.reqValDate,
+          tagged: this.state.tagged,
+          tagDate: this.state.tagDate,
+
+          reqTokenization: this.state.reqTokenization,
+          reqTokenizationDate: this.state.reqTokenizationDate,
+          tokenqty: this.state.tokenqty,
+          tokenKept: this.state.tokenKept, 
+          tokenForSale: this.state.tokenForSale,
+          tokenName: this.state.tokenName, 
+          tokenSuggestedValue: this.state.tokenSuggestedValue,
+          tokenValue: this.state.tokenValue,
+          tokenized: this.state.tokenized,
+          tokenizationDate: this.state.tokenizationDate,
+          buyback: this.state.buyback   
         }
       });   
       
@@ -230,14 +252,14 @@ class NewProduct extends Component {
                 onChange={this.handleChange('description')} 
                 className={classes.textField}
                 margin="normal"/><br/>
-          {/*<TextField 
+          <TextField 
                 id="category" 
                 label="Category" 
                 className={classes.textField} 
                 value={this.state.category || ""} 
                 onChange={this.handleChange('category')} 
                 margin="normal"/><br/>        
-          <TextField 
+          {/*<TextField 
                 id="quantity" 
                 label="Quantity (field to be removed)" 
                 className={classes.textField} 
@@ -285,11 +307,11 @@ class NewProduct extends Component {
                       /> }/><br/>
                         
                       
-          {
+          {/*
             this.state.error && (<Typography component="p" color="error">
               <Icon color="error" className={classes.error}>error</Icon>
               {this.state.error}</Typography>)
-          }
+          */}
         </CardContent>
         <CardActions>
           <Button color="primary" variant="contained" onClick={this.handleCreateArtworkSubmit} className={classes.submit}>Submit</Button>

@@ -8,11 +8,12 @@ import Button from "@material-ui/core/Button";
 import {Redirect/*, Link*/} from 'react-router-dom'
 //import config from './../../config/config'
 
-
 //import {listByOwner} from '../shop/api-shop.js'
 //import {listByShop} from '../product/api-product.js'
 //import Fracts from './../fract/Fracts'
 
+//import Wallet from './../lightwallet/src/components/Alert'
+import Wallet from './../keys/Alert'
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -149,8 +150,12 @@ class MyFinancials extends Component {
           <div className={classes.sectionTitle}>WALLET</div>
           <div className={classes.sectionContainer}>
             <div className={classes.sectionText}>Add your personal wallet to begin to Buy Art</div>
+            
+            <Wallet />
+            {/*
             <input type='text' id="wallet" className={classes.inputWallet} value="0x18w1BgMUnFQEZjydP52CnhwNGuPwQ7aYN4"/>
             <Button className={classes.fullBtn+' '+classes.btnblu+' '+classes.btnFloat}>EDIT</Button>
+            */}
           </div>
         </div>
 

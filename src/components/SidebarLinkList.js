@@ -12,7 +12,7 @@ const SidebarLinkList = (props) => {
     const { classes } = props; 
     return (
         <div className={classes.sidebarLinkList}>
-            { props.userLogged && props.email.indexOf('@looklateral.com') > 0 /*props.userType === 3*/ ?
+            { props.userLogged && props.userType === 3 ?
                 <SidebarSingleLink 
                         name="Admin Dashboard"
                         linkto="/admin"

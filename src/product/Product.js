@@ -45,6 +45,10 @@ const styles = theme => ({
     textAlign: 'center',
     color: 'white',
   },
+  adminDivider: {
+    width: '80%',
+    margin: '80px auto',
+  },
   divider: {
     width: '80%',
     height: 1,
@@ -163,17 +167,29 @@ class Product extends Component {
       dimensions: null,
       year: null,
       location: null,
-
-      creationDate: null,
-      reqTokenizationDate: null,
-      tokenizationDate: null,
       
+      creationDate: null,
       viewable: false,
+
       reqTag: false,
+      reqTagDate: null,
+      tagSent: false,
+      tagSentDate: false,
+      reqVal: false,
+      reqValDate: null,
       tagged: false,
+      tagDate: null,
+
       reqTokenization: false,
-      tokenized: false,
-      onSale: false,
+      reqTokenizationDate: null,
+      tokenqty: 1000000, //const
+      tokenKept: 0, //% to keep
+      tokenForSale: 0, //% to sell
+      tokenName: null, //
+      tokenSuggestedValue: null,
+      tokenValue: null,
+      tokenized: false, // = onSale
+      tokenizationDate: null,
       buyback: false,
 
       suggestions: [],
@@ -203,18 +219,109 @@ class Product extends Component {
         location: data[0].location,
 
         creationDate: data[0].creationDate,
-        reqTokenizationDate: data[0].reqTokenizationDate,
-        tokenizationDate: data[0].tokenizationDate,
-           
         viewable: data[0].viewable,
-        reqTag: data[0].reqTag,
-        tagged: data[0].tagged,
-        reqTokenization: data[0].reqTokenization,
-        tokenized: data[0].tokenized,
-        onSale: data[0].onSale,
-        buyback: data[0].buyback 
+
+        reqTag: data[0].reqTag || false,
+        reqTagDate: data[0].reqTagDate || null,
+        tagSent: data[0].tagSent || false,
+        tagSentDate: data[0].tagSentDate || null,
+        reqVal: data[0].reqVal || false,
+        reqValDate: data[0].reqValDate || null,
+        tagged: data[0].tagged || false,
+        tagDate: data[0].tagDate || null,
+
+        reqTokenization: data[0].reqTokenization || false,
+        reqTokenizationDate: data[0].reqTokenizationDate || null,
+        tokenqty: data[0].tokenqty || 1000000,
+        tokenKept: data[0].tokenKept || 0, 
+        tokenForSale: data[0].tokenForSale || null,
+        tokenName: data[0].tokenName || null, 
+        tokenSuggestedValue: data[0].tokenSuggestedValue || null,
+        tokenValue: data[0].tokenValue || null,
+        tokenized: data[0].tokenized || false,
+        tokenizationDate: data[0].tokenizationDate || null,
+        buyback: data[0].buyback || false  
       })
     }
+  }
+  handleReqTag = (e) => {
+    e.preventDefault()
+    this.setState({ reqTag: true, reqTagDate: Date('Y-m-d h:m:s') },  
+    function() { this.updateProduct() })
+  }
+  handleTagSent = (e) => {
+    e.preventDefault()
+    this.setState({ tagSent: true, tagSentDate: Date('Y-m-d h:m:s') },  
+    function() { this.updateProduct() })
+  }
+  handleReqVal = (e) => {
+    e.preventDefault()
+    this.setState({ reqVal: true, reqValDate: Date('Y-m-d h:m:s') },  
+    function() { this.updateProduct() })
+  }
+  handleTagged = (e) => {
+    e.preventDefault()
+    this.setState({ tagged: true, taggedDate: Date('Y-m-d h:m:s') },  
+    function() { this.updateProduct() })
+  }
+  handleTokenized = (e) => {
+    e.preventDefault()
+    this.setState({ tokenized: true, tokenizedDate: Date('Y-m-d h:m:s') },  
+    function() { 
+      this.updateProduct()
+      /* call the tokization contract!! */
+    })
+  }
+
+
+  updateProduct = async () => {
+      const data = await API.post('artworksAPI', '/artworks/', {
+        body: {
+          id: this.state.id,
+          userId: this.state.userId,
+          name: this.state.name,
+          artist: this.state.artist,
+          description: this.state.description,
+          images: [],
+          category: this.state.category,
+          price: this.state.price,
+          dimensions: this.state.dimensions,
+          year: this.state.year,
+          location: this.state.location,
+
+          creationDate: this.state.creationDate,
+          viewable: this.state.viewable,
+          
+          reqTag: this.state.reqTag,
+          reqTagDate: this.state.reqTagDate,
+          tagSent: this.state.tagSent,
+          tagSentDate: this.state.tagSentDate,
+          reqVal: this.state.reqVal,
+          reqValDate: this.state.reqValDate,
+          tagged: this.state.tagged,
+          tagDate: this.state.tagDate,
+
+          reqTokenization: this.state.reqTokenization,
+          reqTokenizationDate: this.state.reqTokenizationDate,
+          tokenqty: this.state.tokenqty,
+          tokenKept: this.state.tokenKept, 
+          tokenForSale: this.state.tokenForSale,
+          tokenName: this.state.tokenName, 
+          tokenSuggestedValue: this.state.tokenSuggestedValue,
+          tokenValue: this.state.tokenValue,
+          tokenized: this.state.tokenized,
+          tokenizationDate: this.state.tokenizationDate,
+          buyback: this.state.buyback            
+        }
+      });   
+      
+      if (data.error) {
+        this.setState({error: data.error})
+      } else {
+
+        console.log("Artwork administration response:\n" + JSON.stringify(data));
+        this.setState({error: '', redirect: true})
+      } 
   }
 
   componentDidMount = () => {
@@ -222,7 +329,6 @@ class Product extends Component {
         return <Redirect to='/signin'/>
     }
     //this.loadProduct(this.match.params.productId)
-    //this.forceUpdate()
     this.props.handleForceReload()
   }
 
@@ -256,11 +362,19 @@ class Product extends Component {
                       <div className={classes.price}>Estimate: $ {this.state.price}</div>
                     )}
                     <div className={classes.divider}></div>
-                    <div style={{marginBottom: '20px'}}>
-                      <span className={classes.fractPic}><img src={fractPic} alt="0%" /></span>
-                      <span className={classes.fractPerc}>0%</span> { /* ZUNOTE: if tokenized and onSale -> check for get fracts by atrkorkId! */ }
-                      <span className={classes.fractText}>FRACT ON SALE</span>
-                    </div>
+                    { this.state.tokenized ? (
+                      <div style={{marginBottom: '20px'}}>
+                        <span className={classes.fractPic}><img src={fractPic} alt="0%" /></span>
+                        <span className={classes.fractPerc}>{100 - this.state.tokenKept}%</span> { /* ZUNOTE: if tokenized and onSale -> check for get fracts by atrkorkId! */ }
+                        <span className={classes.fractText}>FRACTS ON SALE</span>
+                      </div>
+                    ) : (
+                      <div style={{marginBottom: '20px'}}>
+                        <span className={classes.fractPic}><img src={fractPic} alt="0%" /></span>
+                        <span className={classes.fractPerc}>NOT</span> { /* ZUNOTE: if tokenized and onSale -> check for get fracts by atrkorkId! */ }
+                        <span className={classes.fractText}>For Sale</span>
+                      </div>
+                    )}
 
                     {  //ZUNOTE: only owner can see
                       this.state.userId === this.props.userState.userId ? (
@@ -321,40 +435,130 @@ class Product extends Component {
               </Grid>)*/}
           </Grid>
           
-          { this.state.userId === this.props.userState.userId ? (
+          { this.state.userId === this.props.userState.userId && this.props.userState.userType !== 3 ? (
               <Grid container spacing={40} className={classes.noPaddingGrid}>
                 <Grid item xs={12} sm={12} className={classes.noPaddingGrid}>
                   <Card className={classes.card2}> 
                   
                     {/* SIMONOTE: these buttons only if user=owner; also what path?? and they are visible if the owner didn't request that */}
-                    <div style={{marginTop:20}}>
-                      <Link to={"/"}>{/* SIMONOTE: missing link, add popup: "Tag requested!" */}
-                        <Button 
-                            className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround}>Ask TAG</Button>
-                        </Link>
-                      </div>
-                      <div style={{marginTop:10}}>
-                      <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link */}
-                        <span style={{fontWeight:'bold'}}>Ask TAG:</span> click here for the how-to
-                        </Link>
-                      </div>
+                    
+                      
+                      { this.state.reqTag === false ? (
+                        <div style={{marginTop:20}}>
+                            <Button onClick={this.handleReqTag}
+                              className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround}>Ask TAG</Button>
+                          <div style={{marginTop:10}}></div>
+                          <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link */}
+                            <span style={{fontWeight:'bold'}}>Ask TAG:</span> click here for the how-to
+                          </Link>
+                        </div>
+                      ) : this.state.reqTag === true && this.state.tagSent === false && this.state.reqVal === false ? (
+                        <span style={{fontWeight:'bold'}}>TAG asked, waiting..</span>
+                      
+                      ) : this.state.reqTag === true && this.state.tagSent === true && this.state.reqVal === false ? (
+                          <div style={{marginTop:20}}>
+                            <div style={{fontWeight:'bold'}}>TAG sent, attach it and ask for validation</div>
+                            <Button onClick={this.handleReqVal}
+                              className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround}>Validate TAG</Button>
+                          </div>
+                      ) : this.state.reqTag === true && this.state.tagSent === true && this.state.reqVal === true && this.state.tagged === false ? (
+                        <span style={{fontWeight:'bold'}}>Waiting for tag approvement</span>
+                      ) : (
+                        <span style={{fontWeight:'bold'}}>ARTWORK TAGGED</span>
+                      )}
+                                       
                       <div className={classes.dividerGrey}></div>
-                      <div style={{marginTop:34}}>
-                        <Link to={"/product/" + this.state.id + "/tokenize" }>
-                          <Button 
-                            className={classes.fullBtn+' '+classes.btnblu+' '+classes.btnround}>TOKENIZE</Button>
-                        </Link>
-                      </div>
-                      <div style={{marginTop:10}}>
-                      <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link, add popup: "Tokenization requested!" */}
-                        <span style={{fontWeight:'bold'}}>TOKENIZE:</span> click here for the how-to
-                        </Link>
-                      </div>
+                      
+                      { this.state.tagged === false ? (
+                        <span style={{fontWeight:'bold'}}>In order to ask tokenization the artwork must be tagged.</span>
+                      
+                      ) : this.state.reqTokenization === false ? (
+                        <div style={{marginTop:34}}>
+                          <Link to={"/product/" + this.state.id + "/tokenize" }>
+                            <Button 
+                              className={classes.fullBtn+' '+classes.btnblu+' '+classes.btnround}>TOKENIZE</Button>
+                          </Link>                
+                          <div style={{marginTop:10}}></div>
+                          <Link to={"/"} className={classes.linkTutorial}>{/* SIMONOTE: missing link, add popup: "Tokenization requested!" */}
+                            <span style={{fontWeight:'bold'}}>TOKENIZE:</span> click here for the how-to
+                          </Link>
+                        </div>
+                      ) : this.state.reqTokenization === true && this.state.tokenized === false ? (
+
+                        <span style={{fontWeight:'bold'}}>Tokenization asked, waiting..</span>
+                      ) : (
+                        <span style={{fontWeight:'bold'}}>ARTWORK TOKENIZED</span>
+                      ) }
+                                          
                   </Card>
                 </Grid>
               </Grid>
-            ) : null          
-          }     
+            ) : ''
+          }
+            
+          { this.props.userState.userType !== 3 ? null : ( <div className={classes.titleInfo + ' ' + classes.adminDivider}>ADMINISTRATION CONTROLS</div> ) }
+          {
+            this.props.userState.userType !== 3 ? null :
+
+              this.state.reqTag === false ? 
+              (
+                <div className={classes.adminDivider} style={{fontWeight:'bold'}}>Tag not asked</div>              
+              
+              ) : this.state.reqTag === true && this.state.tagSent === false  && this.state.reqVal === false ? 
+              (  
+                <div className={classes.adminDivider}>
+                  <div style={{fontWeight:'bold'}}>Tag requested, need to send</div>
+                  <Button onClick={this.handleTagSent}
+                      className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround}>Send Tag</Button>     
+                </div>
+            
+              ) : this.state.reqTag === true && this.state.tagSent === true  && this.state.reqVal === false ?
+              (
+                <div className={classes.adminDivider} style={{fontWeight:'bold'}}>Tag sent, waiting for Validation request</div>                    
+                  
+              ) : this.state.reqTag === true && this.state.tagSent === true  && this.state.reqVal === true && this.state.tagged === false ?
+              (
+                <div className={classes.adminDivider}>
+                  <div style={{fontWeight:'bold'}}>Validation requested, need to approve</div>
+                  <Button onClick={this.handleTagged}
+                      className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround}>Validate Tag</Button>     
+                </div>         
+              ) : 
+              (  <div className={classes.adminDivider} style={{fontWeight:'bold'}}>Tag Confirmed</div> 
+              )
+          }
+          
+          { this.props.userState.userType !== 3 ? null : ( <div className={classes.dividerGrey}></div> ) }
+
+          {
+           this.props.userState.userType !== 3 ? null :
+
+              !this.state.reqTokenization ? 
+              (
+                <div className={classes.adminDivider} style={{fontWeight:'bold'}}>Tokenization not asked</div>              
+              ) :                
+                this.state.reqTokenization && this.state.tokenized === false ? 
+                (  
+                  <div className={classes.adminDivider}>
+                    <div style={{fontWeight:'bold'}}>Tokenization requested</div>
+                    
+                    <div className={classes.textInfo}><span style={{fontWeight:'bold'}}>Token Name: </span> {this.state.tokenName}</div>
+                    <div className={classes.textInfo}><span style={{fontWeight:'bold'}}>Token Qty: </span> {this.state.tokenqty}</div>
+                    <div className={classes.textInfo}><span style={{fontWeight:'bold'}}>% Token kept: </span> {this.state.tokenKept}</div>
+                    <div className={classes.textInfo}><span style={{fontWeight:'bold'}}>Suggested Value: </span> {this.state.tokenSuggestedValue}</div>
+                    <div className={classes.textInfo}><span style={{fontWeight:'bold'}}>Buyback: </span> {this.state.buyback ? 'Yes' : 'No'}</div>
+
+                    <Button onClick={this.handleTokenized}
+                        className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround}>Tokenize</Button>     
+                  </div>
+            
+                ) : (                    
+                  <div className={classes.adminDivider} style={{fontWeight:'bold'}}>Tokenization Confirmed</div>
+                )
+          }
+              
+          
+                     
         </div>)
 
       

@@ -70,7 +70,7 @@ class Provenance extends Component {
       alert('error loading artworks:\n' + JSON.stringify(data.error))
     } else {
       let provenanceProducts = data.data.filter((product, index) => {       
-        return 1!==0 // ZUNOTE: make the correct filter product.viewable === true
+        return product.viewable === true && product.tagged === true
       });
       this.setState({ products: provenanceProducts })
     }

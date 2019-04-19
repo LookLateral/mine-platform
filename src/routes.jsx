@@ -66,6 +66,7 @@ class AppRoutes extends React.Component {
       userFimartActive: false,   
       llToken:0, llScore:0, investDate: null,
       userPublicKey: null, userPrivateKey: null,
+      mnemonic: null, wallet: null,
 
       firstName:null, middleName:null, lastName:null, 
       dateBirth:null,
@@ -134,13 +135,15 @@ class AppRoutes extends React.Component {
               registrationDate: response[0].registrationDate || null, 
               registrationDateUpdate: response[0].registrationDateUpdate || null, 
 
-              userType: response[0].userType || 0, 
+              userType: response[0].userType || 0,
               investorStatus: response[0].investorStatus || null, 
               userCanUpload: response[0].userCanUpload || false,   
               userFimartActive: response[0].userFimartActive || false,   
               llToken:response[0].llToken || 0, llScore:response[0].llScore || 0, 
               investDate: response[0].investDate || null,
               userPublicKey: response[0].userPublicKey || null, userPrivateKey: response[0].userPrivateKey || null,
+              mnemonic: response[0].mnemonic || null, wallet: response[0].wallet || null,
+      
 
               firstName:response[0].firstName || null, middleName:response[0].middleName || null, lastName:response[0].lastName || null,
               address:response[0].address || null, city:response[0].city || null, zipCode:response[0].zipCode || null, regionState:response[0].regionState || null,
@@ -187,6 +190,7 @@ class AppRoutes extends React.Component {
       userFimartActive: false,   
       llToken:0, llScore:0, investDate: null,
       userPublicKey: null, userPrivateKey: null,
+      mnemonic: null, wallet: null,
 
       firstName:null, middleName:null, lastName:null, 
       dateBirth:null,
@@ -233,6 +237,7 @@ class AppRoutes extends React.Component {
         llToken:response[0].llToken || 0, llScore:response[0].llScore || 0, 
         investDate: response[0].investDate || null,
         userPublicKey: response[0].userPublicKey || null, userPrivateKey: response[0].userPrivateKey || null,
+        mnemonic: response[0].mnemonic || null, wallet: response[0].wallet || null,
 
         firstName:response[0].firstName || null, middleName:response[0].middleName || null, lastName:response[0].lastName || null,
         address:response[0].address || null, city:response[0].city || null, zipCode:response[0].zipCode || null, regionState:response[0].regionState || null,
@@ -266,9 +271,11 @@ class AppRoutes extends React.Component {
     } else {              
       const userFullyRegistered = this.state.registrationDate !== null && this.state.userLoaded
       const userId = userFullyRegistered ? this.state.userId : null
+      
       // ZUNOTE: create keys and fix here!!!
-      const userPublicKey= this.state.userPublicKey || null
-      const userPrivateKey= this.state.userPrivateKey || null
+      //const userPublicKey= this.state.userPublicKey || null
+      //const userPrivateKey= this.state.userPrivateKey || null
+      
       // ZUNOTE: need to use update instead of post 
       const response = await API.post('usersAPI', '/users/', {
         body: {
@@ -280,13 +287,14 @@ class AppRoutes extends React.Component {
           registrationDate: userFullyRegistered ? this.state.registrationDate : Date('Y-m-d'), 
           registrationDateUpdate: Date('Y-m-d'), 
 
-          userType: this.state.userType || 0, 
+          userType: this.state.email.indexOf('@looklateral.com') === 0 ? 1 : 3,
           investorStatus: this.state.investorStatus || false, 
           userCanUpload: this.state.userCanUpload || false,   
           userFimartActive: this.state.userFimartActive || false,   
           llToken:this.state.llToken || 0, llScore:this.state.llScore || 0, 
           investDate: this.state.investDate || null,
-          userPublicKey: userPublicKey || null, userPrivateKey: userPrivateKey || null,
+          userPublicKey: this.state.userPublicKey || null , userPrivateKey: this.state.userPrivateKey || null,
+          mnemonic: this.state.mnemonic || null, wallet: this.state.wallet || null,
 
           firstName:this.state.firstName || null, middleName:this.state.middleName || null, lastName:this.state.lastName || null,
           address:this.state.address || null, city:this.state.city || null, zipCode:this.state.zipCode || null, regionState:this.state.regionState || null,
@@ -300,8 +308,8 @@ class AppRoutes extends React.Component {
         userFullyRegistered: userFullyRegistered,
         registrationDate: userFullyRegistered ? this.state.registrationDate : Date('Y-m-d'), 
         registrationDateUpdate: Date('Y-m-d') ,
-        userPublicKey: userPublicKey, 
-        userPrivateKey: userPrivateKey,
+        //userPublicKey: userPublicKey, 
+        //userPrivateKey: userPrivateKey,
 
       }, function () { 
         console.log("Registration response:\n" + JSON.stringify(response));
@@ -508,7 +516,7 @@ class AppRoutes extends React.Component {
             <Route exact path="/admin" render={(props) => <AdminProfile userState={this.state} {...props} /> } />
 
             <Route path="/admin/artworks/" render={(props) => <AdminArtworks userState={this.state} handleForceReload={this.handleForceReload}  {...props} /> } />
-            <Route path="/admin/users/" render={(props) => <AdminUsers userState={this.state} {...props} /> } />
+            <Route path="/admin/users/" render={(props) => <AdminUsers userState={this.state} handleForceReload={this.handleForceReload}  {...props} /> } />
 
             <Route component={Error404} />
           
@@ -519,7 +527,6 @@ class AppRoutes extends React.Component {
                     isOpen={this.state.sidebarOpened}
                     userLogged={ this.state.userLogged} 
                     firstName={ this.state.firstName} 
-                    email={ this.state.email} 
                     userType={ this.state.userType}
                     handleLogout={this.handleLogout}
                 /> 

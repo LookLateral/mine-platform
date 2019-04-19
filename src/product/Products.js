@@ -167,11 +167,20 @@ class Products extends Component {
                             <div className={classes.title}>{product.name}</div>
                             <div className={classes.price}>Estimate: $ {product.price}</div>
                             <div className={classes.divider}></div>
-                            <div style={{marginBottom: '20px'}}>
-                              <span className={classes.fractPic}><img src={fractPic} alt="0%"/></span>
-                              <span className={classes.fractPerc}>0%</span> 
-                              <span className={classes.fractText}>FRACT ON SALE</span>
-                            </div>
+                            { product.tokenized ? (
+                              <div style={{marginBottom: '20px'}}>
+                                <span className={classes.fractPic}><img src={fractPic} alt={(100 - product.tokenKept) + '%'} /></span>
+                                <span className={classes.fractPerc}>{100 - product.tokenKept}%</span> { /* ZUNOTE: if tokenized and onSale -> check for get fracts by atrkorkId! */ }
+                                <span className={classes.fractText}>FRACTS ON SALE</span>
+                              </div>
+                            ) : (
+                              <div style={{marginBottom: '20px'}}>
+                                <span className={classes.fractPic}><img src={fractPic} alt="NOT for sale" /></span>
+                                <span className={classes.fractPerc}>NOT</span>
+                                <span className={classes.fractText}>For Sale</span>
+                              </div>
+
+                            )}
                           </div>
                         </div>  
                       </Grid>

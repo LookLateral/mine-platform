@@ -70,7 +70,7 @@ class Fimart extends Component {
       alert('error Fimart loading artworks:\n' + JSON.stringify(data.error))
     } else {
       let fimartProducts = data.data.filter((product, index) => {       
-        return 1!==0 // ZUNOTE: make the correct filter product.onSale === true
+        return product.tokenized === true
       });
       this.setState({ products: fimartProducts })
     }

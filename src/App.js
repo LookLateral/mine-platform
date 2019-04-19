@@ -6,9 +6,12 @@ import IconSandwich from './components/IconSandwich'
 import './App.css';
 
 class App extends React.Component {
-  
+
   render() {
     const userState = this.props.userState;  
+
+    Object.defineProperty(global, '_bitcore', { get(){ return undefined }, set(){} })
+
     //if (this.props.authState === "signedIn") {
       return (     
         <div className="App">

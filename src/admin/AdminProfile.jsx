@@ -103,6 +103,30 @@ class AdminProfile extends Component {
         <div className={classes.spacer}></div>
 
         <div className={classes.section}>
+          <div className={classes.sectionTitle}>Tag sent, Validation Requests</div>
+          <div className={classes.sectionContainer}>
+            <div className={classes.sectionText}>List all ...</div>
+            <Link to={"admin/artworks/val"}>
+              <Button className={classes.fullBtn+' '+classes.btnblu+' '+classes.btnFloat}>LIST</Button>
+            </Link>
+          </div>
+        </div>
+
+        <div className={classes.spacer}></div>
+
+        <div className={classes.section}>
+          <div className={classes.sectionTitle}>Tagged Artworks</div>
+          <div className={classes.sectionContainer}>
+            <div className={classes.sectionText}>List all ...</div>
+            <Link to={"admin/artworks/tagged"}>
+              <Button className={classes.fullBtn+' '+classes.btnblu+' '+classes.btnFloat}>LIST</Button>
+            </Link>
+          </div>
+        </div>
+
+        <div className={classes.spacer}></div>
+
+        <div className={classes.section}>
           <div className={classes.sectionTitle}>Tokenization Requests</div>
           <div className={classes.sectionContainer}>
             <div className={classes.sectionText}>List all ...</div>

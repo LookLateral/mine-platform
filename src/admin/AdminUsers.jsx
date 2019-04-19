@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles';
-import { Redirect, Link } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 import Card from '@material-ui/core/Card'
 import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
@@ -83,6 +83,7 @@ class AdminUsers extends Component {
 
         if(this.state.url === '') return true
         //else if() return 
+        return false
       
       });
       this.setState({ users: loadUsers })
@@ -90,7 +91,7 @@ class AdminUsers extends Component {
   }
 
   componentDidMount() {
-    if (!this.props.userState.userLogged || this.props.userState.email.indexOf('@looklateral.com') === 0)  { 
+    if (!this.props.userState.userLogged || this.props.userState.userType !== 3)  { 
       return <Redirect to='/signin' />
     }
     this.props.handleForceReload()
@@ -132,7 +133,7 @@ class AdminUsers extends Component {
                               <div className={classes.subheading}>
                                 {/* SIMONOTES: static html */}
                                 <div className={classes.title}>{user.firstName + ' ' + user.lastName}<span className={classes.mailRight}>{user.user_email}</span></div>
-                                <div className={classes.detail}>User Type: {user.user_email.indexOf('@looklateral.com') > 0 ? 'Admin' : 'User'}</div>
+                                <div className={classes.detail}>User Type: {user.userType === 3 ? 'Admin' : 'User'}</div>
                                 <div className={classes.detail}>Missing details to complete the registration: Fimart not active</div>
                               </div>
                             </div>  
