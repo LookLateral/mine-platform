@@ -14,6 +14,7 @@ import { API } from 'aws-amplify';
 import BackgroundLeft from '../assets/images/image-home-sx.jpg';
 import fractPic from '../assets/images/fractPic.png';
 import EmptyPic from '../assets/images/empty-pic.jpg';
+import { initTokanization } from './../bigchain/TokenizeArtwork'
 
 
 const styles = theme => ({
@@ -157,6 +158,7 @@ class Product extends Component {
     super()
     this.state = {
       id: null,
+      fractId: null,
       userId: null,
       name: null,
       artist: null,
@@ -208,6 +210,7 @@ class Product extends Component {
       this.setState({ 
         id: data[0].id,
         userId: data[0].userId,
+        fractId: data[0].fractId,
         name: data[0].name,
         artist: data[0].artist,
         description: data[0].description,
@@ -246,30 +249,52 @@ class Product extends Component {
   }
   handleReqTag = (e) => {
     e.preventDefault()
-    this.setState({ reqTag: true, reqTagDate: Date('Y-m-d h:m:s') },  
+    this.setState({ reqTag: true, reqTagDate: Date('Y-m-d') },  
     function() { this.updateProduct() })
   }
   handleTagSent = (e) => {
     e.preventDefault()
-    this.setState({ tagSent: true, tagSentDate: Date('Y-m-d h:m:s') },  
+    this.setState({ tagSent: true, tagSentDate: Date('Y-m-d') },  
     function() { this.updateProduct() })
   }
   handleReqVal = (e) => {
     e.preventDefault()
-    this.setState({ reqVal: true, reqValDate: Date('Y-m-d h:m:s') },  
+    this.setState({ reqVal: true, reqValDate: Date('Y-m-d') },  
     function() { this.updateProduct() })
   }
   handleTagged = (e) => {
     e.preventDefault()
-    this.setState({ tagged: true, taggedDate: Date('Y-m-d h:m:s') },  
+    this.setState({ tagged: true, taggedDate: Date('Y-m-d') },  
     function() { this.updateProduct() })
   }
   handleTokenized = (e) => {
     e.preventDefault()
+
+    
+    let tokenDetails = {
+      artworkId: this.state.id,
+      owner: this.state.userId,
+      fractId: null,
+      tokenqty: this.state.tokenqty,
+      tokenKept: this.state.tokenKept,
+      tokenName: this.state.tokenName,
+      tokenSuggestedValue: this.state.tokenSuggestedValue,
+      tokenValue: this.state.tokenValue,
+      buyback: this.state.buyback,
+      //name: this.state.name,
+      //artist: this.state.artist,
+      //year: this.state.year,    
+      //location: this.state.location,
+    }
+
+    const txnTokenArtwork = initTokanization(tokenDetails/*, tokenMetadata*/)
+    this.setState({ fractId: txnTokenArtwork })
+
+    //need to write in fractTable!!
+
     this.setState({ tokenized: true, tokenizedDate: Date('Y-m-d h:m:s') },  
     function() { 
       this.updateProduct()
-      /* call the tokization contract!! */
     })
   }
 
@@ -279,6 +304,7 @@ class Product extends Component {
         body: {
           id: this.state.id,
           userId: this.state.userId,
+          fractId: this.state.fractId,
           name: this.state.name,
           artist: this.state.artist,
           description: this.state.description,
@@ -320,6 +346,7 @@ class Product extends Component {
       } else {
 
         console.log("Artwork administration response:\n" + JSON.stringify(data));
+        console.log("Artwork administration state:\n" + JSON.stringify(this.state));
         this.setState({error: '', redirect: true})
       } 
   }

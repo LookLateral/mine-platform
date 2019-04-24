@@ -58,6 +58,7 @@ class NewProduct extends Component {
     super()
     this.state = {
       id: null,
+      fractId: null,
       userId: null,
       name: null,
       artist: null,
@@ -163,6 +164,7 @@ class NewProduct extends Component {
         body: {
           id: this.state.id,
           userId: this.props.userState.userId,
+          fractId: this.state.fractId || null,
           name: this.state.name,
           artist: this.state.artist,
           description: this.state.description,

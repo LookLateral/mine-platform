@@ -65,6 +65,7 @@ class EditProduct extends Component {
     this.state = {
       id: null,
       userId: null,
+      fractId: null,
       name: null,
       artist: null,
       description: null,
@@ -149,6 +150,7 @@ class EditProduct extends Component {
       this.setState({ 
         id: data[0].id,
         userId: data[0].userId,
+        fractId: data[0].fractId || null,
         name: data[0].name,
         artist: data[0].artist,
         description: data[0].description,
@@ -195,6 +197,7 @@ class EditProduct extends Component {
         body: {
           id: this.state.id,
           userId: this.state.userId,
+          fractId: this.state.fractId,
           name: this.state.name,
           artist: this.state.artist,
           description: this.state.description,
