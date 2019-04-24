@@ -1,0 +1,34 @@
+{
+    "paths": [
+        {
+            "name": "/fracts",
+            "lambdaFunction": "fractLambda",
+            "privacy": {
+                "open": true
+            }
+        }
+    ],
+    "resourceName": "fractAPI",
+    "apiName": "fractAPI",
+    "functionArns": [
+        {
+            "lambdaFunction": "fractLambda"
+        }
+    ],
+    "privacy": {
+        "auth": 0,
+        "unauth": 0,
+        "authRoleName": "ll-platform-20190412100542-authRole",
+        "unAuthRoleName": "ll-platform-20190412100542-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "fractLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}

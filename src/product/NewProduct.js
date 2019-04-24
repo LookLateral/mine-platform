@@ -58,7 +58,7 @@ class NewProduct extends Component {
     super()
     this.state = {
       id: null,
-      fractId: null,
+      tokenizationId: null,
       userId: null,
       name: null,
       artist: null,
@@ -98,6 +98,7 @@ class NewProduct extends Component {
       error: ''
     }
     this.match = match
+    this.createTransaction = this.createTransaction.bind(this)
     this.createArtwork = this.createArtwork.bind(this)
   }
 
@@ -143,18 +144,42 @@ class NewProduct extends Component {
       value_btc: null,
     }
     // ZUNOTE: need to get image!!
-
     //console.log('bigchain data:\nuploadDetails:\n' + JSON.stringify(uploadDetails) + '\nuploadMetadata:\n' + JSON.stringify(uploadMetadata));
     const txnUploadArtwork = writeArtworkToChain(uploadDetails, uploadMetadata)
     this.setState({ id: txnUploadArtwork }, function () { 
       
       uploadFileInBucket(txnUploadArtwork + '/picture/name.txt', 'file here')
-
-      this.createArtwork();
-     
+      this.createTransaction();     
     })
   }
   
+  createTransaction = async () => {      
+    if(this.state.name===null || this.state.artist===null){
+      alert('Please complete all required fields'); 
+      return false;
+    } else {        
+      const data = await API.post('txnAPI', '/txns/', {
+        body: {
+          id: this.state.id,
+          artworkId: this.state.id,
+          tokenizationId: null,
+          giverUserId: null,
+          receiverUserId: this.props.userState.userId,
+          amount: null,
+          operation: 'upload',
+          date: Date('Y-m-d')
+        }
+      });
+      if (data.error) {
+        this.setState({error: data.error})
+        console.log("Error in Txn creation for upload:\n" + JSON.stringify(data.error));
+      } else {
+        console.log("Txn creation response for upload:\n" + JSON.stringify(data));
+        this.createArtwork();
+      }
+    }
+  }
+
   createArtwork = async () => {
     if(this.state.name===null || this.state.artist===null){
       alert('Please complete all required fields'); 
@@ -164,7 +189,7 @@ class NewProduct extends Component {
         body: {
           id: this.state.id,
           userId: this.props.userState.userId,
-          fractId: this.state.fractId || null,
+          tokenizationId: this.state.tokenizationId || null,
           name: this.state.name,
           artist: this.state.artist,
           description: this.state.description,
@@ -202,6 +227,7 @@ class NewProduct extends Component {
       
       if (data.error) {
         this.setState({error: data.error})
+        console.log("Error in artwork creation:\n" + JSON.stringify(data.error));
       } else {
         console.log("Artwork creation response:\n" + JSON.stringify(data));
         //console.log("Artwork creation state:\n" + JSON.stringify(this.state));

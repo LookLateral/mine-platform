@@ -144,6 +144,30 @@
 				}
 			}
 		},
+		"storagetxnTable": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/storage/txnTable-cloudformation-template.json",
+				"Parameters": {
+					"tableName": "txnTable",
+					"partitionKeyName": "id",
+					"partitionKeyType": "S",
+					"env": "dev"
+				}
+			}
+		},
+		"storagefractTable": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/storage/fractTable-cloudformation-template.json",
+				"Parameters": {
+					"tableName": "fractTable",
+					"partitionKeyName": "id",
+					"partitionKeyType": "S",
+					"env": "dev"
+				}
+			}
+		},
 		"functionusersLambda": {
 			"Type": "AWS::CloudFormation::Stack",
 			"Properties": {
@@ -200,6 +224,48 @@
 					"storageartworksTableArn": {
 						"Fn::GetAtt": [
 							"storageartworksTable",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"functiontxnLambda": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/function/txnLambda-cloudformation-template.json",
+				"Parameters": {
+					"storagetxnTableName": {
+						"Fn::GetAtt": [
+							"storagetxnTable",
+							"Outputs.Name"
+						]
+					},
+					"storagetxnTableArn": {
+						"Fn::GetAtt": [
+							"storagetxnTable",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"functionfractLambda": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/function/fractLambda-cloudformation-template.json",
+				"Parameters": {
+					"storagefractTableName": {
+						"Fn::GetAtt": [
+							"storagefractTable",
+							"Outputs.Name"
+						]
+					},
+					"storagefractTableArn": {
+						"Fn::GetAtt": [
+							"storagefractTable",
 							"Outputs.Arn"
 						]
 					},
@@ -281,6 +347,60 @@
 					"functionartworksLambdaArn": {
 						"Fn::GetAtt": [
 							"functionartworksLambda",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"apitxnAPI": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/api/txnAPI-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functiontxnLambdaName": {
+						"Fn::GetAtt": [
+							"functiontxnLambda",
+							"Outputs.Name"
+						]
+					},
+					"functiontxnLambdaArn": {
+						"Fn::GetAtt": [
+							"functiontxnLambda",
+							"Outputs.Arn"
+						]
+					},
+					"env": "dev"
+				}
+			}
+		},
+		"apifractAPI": {
+			"Type": "AWS::CloudFormation::Stack",
+			"Properties": {
+				"TemplateURL": "https://s3.amazonaws.com/ll-platform-20190412100542-deployment/amplify-cfn-templates/api/fractAPI-cloudformation-template.json",
+				"Parameters": {
+					"authRoleName": {
+						"Ref": "AuthRoleName"
+					},
+					"unauthRoleName": {
+						"Ref": "UnauthRoleName"
+					},
+					"functionfractLambdaName": {
+						"Fn::GetAtt": [
+							"functionfractLambda",
+							"Outputs.Name"
+						]
+					},
+					"functionfractLambdaArn": {
+						"Fn::GetAtt": [
+							"functionfractLambda",
 							"Outputs.Arn"
 						]
 					},

@@ -12,8 +12,9 @@ const conn = new BigchainDB.Connection(API_PATH)
 /* ZUNOTE - IMPORTANT in this contract need to add the buyback functionality and consider how much they want to sell/keep!! */
 
 let tokenDetails = {
+    tokenizationId: null,
     artworkId: null,
-    owner: null,
+    ownerId: null,
     tokenqty: null,
     tokenToKeep: null, 
     tokenLeft: null,
@@ -37,7 +38,7 @@ const initTokanization = (_tokenDetails/*, _tokenMetadata*/) => {
     tokenDetails.artworkId = _tokenDetails.artworkId
     tokenDetails.owner = _tokenDetails.owner
     tokenDetails.tokenqty = _tokenDetails.tokenqty
-    tokenDetails.tokenLeft = _tokenDetails.tokenqty
+    //tokenDetails.tokenLeft = _tokenDetails.tokenqty                     after txn success
     tokenDetails.tokenToKeep = _tokenDetails.tokenKept
     tokenDetails.name = _tokenDetails.name
     tokenDetails.tokenSuggestedValue = _tokenDetails.tokenSuggestedValue
@@ -76,8 +77,8 @@ function tokenLaunch() {
     conn.postTransactionCommit(txSigned)
         .then(res => {
             createTxId = res.id
-            //tokensLeft = nTokens //done before: tokenDetails.tokenLeft = _tokenDetails.tokenqty
-            tokenDetails.fractId = txSigned.id //save txnId as fractId
+            tokenDetails.tokenLeft = tokenDetails.tokenqty
+            tokenDetails.tokenizationId = txSigned.id 
 
             //document.body.innerHTML ='<h3>Transaction created</h3>';
             //document.body.innerHTML +=txSigned.id
@@ -87,11 +88,14 @@ function tokenLaunch() {
 }
 
 
+
+////////////////////////////// need to fix all, i'm building previous stuff, step by step
+
 let txnId
-
-
 let receiver = {
     userId: null,
+    artworkId: null,
+    tokenizationId: null,
     fractId: null,
     amountToSend: null,
   }
@@ -147,8 +151,8 @@ function transferTokens() {
         })
         .then(res => {
             tokenDetails.tokenLeft -= receiver.amountToSend
-            document.body.innerHTML += '<h3>Transfer transaction created</h3>'
-            document.body.innerHTML += res.id
+            //document.body.innerHTML += '<h3>Transfer transaction created</h3>'
+            //document.body.innerHTML += res.id
             //return res.id
             txnId = res.id
             console.log("response transferTokens:\n" + JSON.stringify(res));

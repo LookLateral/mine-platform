@@ -158,7 +158,7 @@ class Product extends Component {
     super()
     this.state = {
       id: null,
-      fractId: null,
+      tokenizationId: null,
       userId: null,
       name: null,
       artist: null,
@@ -210,7 +210,7 @@ class Product extends Component {
       this.setState({ 
         id: data[0].id,
         userId: data[0].userId,
-        fractId: data[0].fractId,
+        tokenizationId: data[0].tokenizationId,
         name: data[0].name,
         artist: data[0].artist,
         description: data[0].description,
@@ -267,14 +267,13 @@ class Product extends Component {
     this.setState({ tagged: true, taggedDate: Date('Y-m-d') },  
     function() { this.updateProduct() })
   }
+  
   handleTokenized = (e) => {
     e.preventDefault()
 
-    
     let tokenDetails = {
       artworkId: this.state.id,
       owner: this.state.userId,
-      fractId: null,
       tokenqty: this.state.tokenqty,
       tokenKept: this.state.tokenKept,
       tokenName: this.state.tokenName,
@@ -288,23 +287,62 @@ class Product extends Component {
     }
 
     const txnTokenArtwork = initTokanization(tokenDetails/*, tokenMetadata*/)
-    this.setState({ fractId: txnTokenArtwork })
 
-    //need to write in fractTable!!
-
-    this.setState({ tokenized: true, tokenizedDate: Date('Y-m-d h:m:s') },  
+    this.setState({ tokenizationId: txnTokenArtwork, tokenized: true, tokenizedDate: Date('Y-m-d') },  
     function() { 
-      this.updateProduct()
+      this.createTransaction();
     })
   }
 
+  createTransaction = async () => {            
+    const data = await API.post('txnAPI', '/txns/', {
+      body: {
+        id: this.state.tokenizationId, 
+        artworkId: this.state.id,
+        tokenizationId: this.state.tokenizationId,
+        giverUserId: null,
+        receiverUserId: this.state.userId,
+        amount: this.state.tokenqty,
+        operation: 'token',
+        date: Date('Y-m-d')
+      }
+    });
+    if (data.error) {
+      this.setState({error: data.error})
+      console.log("Error in Txn creation for tokenization:\n" + JSON.stringify(data.error));
+    } else {
+      console.log("Txn creation response for tokenization:\n" + JSON.stringify(data));
+      this.createFract();
+    }
+  }
+
+  createFract = async () => {          
+    const data = await API.post('fractAPI', '/fracts/', {
+      body: {
+        id: this.state.tokenizationId, 
+        artworkId: this.state.id,
+        tokenizationId: this.state.tokenizationId,
+        ownerId: this.state.userId,
+        amount: this.state.tokenqty,
+        value: null,
+        date: Date('Y-m-d')
+      }
+    });
+    if (data.error) {
+      this.setState({error: data.error})
+      console.log("Error in Txn creation for tokenization:\n" + JSON.stringify(data.error));
+    } else {
+      console.log("Txn creation response for tokenization:\n" + JSON.stringify(data));
+      this.updateProduct();
+    }
+  }
 
   updateProduct = async () => {
       const data = await API.post('artworksAPI', '/artworks/', {
         body: {
           id: this.state.id,
           userId: this.state.userId,
-          fractId: this.state.fractId,
+          tokenizationId: this.state.tokenizationId,
           name: this.state.name,
           artist: this.state.artist,
           description: this.state.description,
@@ -339,8 +377,7 @@ class Product extends Component {
           tokenizationDate: this.state.tokenizationDate,
           buyback: this.state.buyback            
         }
-      });   
-      
+      });      
       if (data.error) {
         this.setState({error: data.error})
       } else {

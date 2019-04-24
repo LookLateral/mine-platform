@@ -1,0 +1,5 @@
+{
+    "tableName": "fractTable",
+    "partitionKeyName": "id",
+    "partitionKeyType": "S"
+}

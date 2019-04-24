@@ -1,0 +1,34 @@
+{
+    "paths": [
+        {
+            "name": "/txns",
+            "lambdaFunction": "txnLambda",
+            "privacy": {
+                "open": true
+            }
+        }
+    ],
+    "resourceName": "txnAPI",
+    "apiName": "txnAPI",
+    "functionArns": [
+        {
+            "lambdaFunction": "txnLambda"
+        }
+    ],
+    "privacy": {
+        "auth": 0,
+        "unauth": 0,
+        "authRoleName": "ll-platform-20190412100542-authRole",
+        "unAuthRoleName": "ll-platform-20190412100542-unauthRole"
+    },
+    "dependsOn": [
+        {
+            "category": "function",
+            "resourceName": "txnLambda",
+            "attributes": [
+                "Name",
+                "Arn"
+            ]
+        }
+    ]
+}
