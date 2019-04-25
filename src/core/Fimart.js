@@ -4,7 +4,7 @@ import { withStyles } from '@material-ui/core/styles';
 //import { Redirect, Link } from 'react-router-dom'
 //import {read} from './api-shop.js'
 //import {listByShop} from './../product/api-product.js'
-import Products from './../product/Products'
+import Fracts from './../fract/Fracts'
 //import Button from '@material-ui/core/Button'
 import Card from '@material-ui/core/Card'
 import Typography from '@material-ui/core/Typography'
@@ -53,26 +53,24 @@ class Fimart extends Component {
   constructor({ match }) {
     super()
     this.state = {
-      products: [],
+      fracts: [],
       error: '',
     }
     this.match = match
-    this.loadProducts = this.loadProducts.bind(this)
+    this.loadFracts = this.loadFracts.bind(this)
   }
 
-  loadProducts = async () => {
-    if(isEmpty(this.state.products)) 
-      console.log('getting user artworks in my-art');
+  loadFracts = async () => {
     //const data = await API.getByViewable('artworksAPI', '/artworks/user', { body: {userId: this.props.userState.userId} });
-    const data = await API.get('artworksAPI', '/artworks');
+    const data = await API.get('fractAPI', '/fracts');
     if (data.error) {
       this.setState({ error: data.error })
       alert('error Fimart loading artworks:\n' + JSON.stringify(data.error))
     } else {
-      let fimartProducts = data.data.filter((product, index) => {       
-        return product.tokenized === true
+      let fimartFracts = data.data.filter((fract, index) => {       
+        return true
       });
-      this.setState({ products: fimartProducts })
+      this.setState({ fracts: fimartFracts })
     }
   }
 
@@ -84,7 +82,7 @@ class Fimart extends Component {
   }
   
   componentWillReceiveProps() {
-    this.loadProducts()
+    this.loadFracts()
   }
 
   render() {
@@ -98,7 +96,7 @@ class Fimart extends Component {
                 Fimart
               </Typography>
               <div className={classes.divider}></div>
-              <Products products={this.state.products} searched={false} />
+              <Fracts fracts={this.state.fracts} searched={false} />
             </Card>
           </Grid>
         </Grid>
@@ -110,11 +108,3 @@ Fimart.propTypes = {
   classes: PropTypes.object.isRequired
 }
 export default withStyles(styles)(Fimart)
-
-function isEmpty(obj) {
-  for(var key in obj) {
-      if(obj.hasOwnProperty(key))
-          return false;
-  }
-  return true;
-}

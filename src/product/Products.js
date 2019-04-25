@@ -5,7 +5,7 @@ import {Link} from 'react-router-dom'
 //import AddToCart from './../cart/AddToCart'
 import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
-import fractPic from '../assets/images/fractPic.png';
+//import fractPic from '../assets/images/fractPic.png';
 import EmptyPic from '../assets/images/empty-pic.jpg';
 
 
@@ -146,7 +146,7 @@ class Products extends Component {
       
       // const imageUrl = '/api/product/image/'+product.id ZUNOTE: put it back in map! 
 
-      return (
+      return (  //change artwork layout: picture in floating
         <div className={classes.root}>
         {this.props.products.length > 0 ?
           (<div className={classes.container}>
@@ -165,12 +165,12 @@ class Products extends Component {
                             {/* SIMONOTES: static html */}
                             <div className={classes.artist}>{product.artist}</div>
                             <div className={classes.title}>{product.name}</div>
-                            <div className={classes.price}>Estimate: $ {product.price}</div>
+                            {/*<div className={classes.price}>Estimate: $ {product.price}</div>*/}
                             <div className={classes.divider}></div>
-                            { product.tokenized ? (
+                            { /* product.tokenized ? (
                               <div style={{marginBottom: '20px'}}>
                                 <span className={classes.fractPic}><img src={fractPic} alt={(100 - product.tokenKept) + '%'} /></span>
-                                <span className={classes.fractPerc}>{100 - product.tokenKept}%</span> { /* ZUNOTE: if tokenized and onSale -> check for get fracts by atrkorkId! */ }
+                                <span className={classes.fractPerc}>{100 - product.tokenKept}%</span>
                                 <span className={classes.fractText}>FRACTS ON SALE</span>
                               </div>
                             ) : (
@@ -180,7 +180,7 @@ class Products extends Component {
                                 <span className={classes.fractText}>For Sale</span>
                               </div>
 
-                            )}
+                            )*/}
                           </div>
                         </div>  
                       </Grid>

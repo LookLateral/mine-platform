@@ -11,7 +11,7 @@ import TextField from '@material-ui/core/TextField'
 import Checkbox from '@material-ui/core/Checkbox'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Typography from '@material-ui/core/Typography'
-import Icon from '@material-ui/core/Icon'
+//import Icon from '@material-ui/core/Icon'
 //import {create} from './api-product.js'
 import {Link, Redirect} from 'react-router-dom'
 import { API } from 'aws-amplify';
@@ -166,7 +166,13 @@ class NewProduct extends Component {
           giverUserId: null,
           receiverUserId: this.props.userState.userId,
           amount: null,
-          operation: 'upload',
+          operation: 'Uploaded',
+          name: this.state.name,
+          artist: this.state.artist,
+          value_usd: null,
+          value_look: null,
+          percOwned: null,
+          percToKeep: null,
           date: Date('Y-m-d')
         }
       });

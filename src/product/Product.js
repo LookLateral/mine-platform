@@ -303,7 +303,13 @@ class Product extends Component {
         giverUserId: null,
         receiverUserId: this.state.userId,
         amount: this.state.tokenqty,
-        operation: 'token',
+        operation: 'Tokenization',
+        name: this.state.name,
+        artist: this.state.artist,
+        value_usd: null,
+        value_look: null,
+        percOwned: 100,
+        percToKeep: parseInt(this.state.tokenKept),
         date: Date('Y-m-d')
       }
     });
@@ -324,7 +330,12 @@ class Product extends Component {
         tokenizationId: this.state.tokenizationId,
         ownerId: this.state.userId,
         amount: this.state.tokenqty,
-        value: null,
+        percOwned: 100,
+        percToKeep: this.state.tokenKept, //for future.. if tokeep > owned -> means it is in wishlist, he want to buy
+        name: this.state.name,
+        artist: this.state.artist,
+        value_usd: null, //values?
+        value_look: null,      
         date: Date('Y-m-d')
       }
     });
@@ -426,19 +437,19 @@ class Product extends Component {
                       <div className={classes.price}>Estimate: $ {this.state.price}</div>
                     )}
                     <div className={classes.divider}></div>
-                    { this.state.tokenized ? (
+                    {/* this.state.tokenized ? (
                       <div style={{marginBottom: '20px'}}>
                         <span className={classes.fractPic}><img src={fractPic} alt="0%" /></span>
-                        <span className={classes.fractPerc}>{100 - this.state.tokenKept}%</span> { /* ZUNOTE: if tokenized and onSale -> check for get fracts by atrkorkId! */ }
+                        <span className={classes.fractPerc}>{100 - this.state.tokenKept}%</span> 
                         <span className={classes.fractText}>FRACTS ON SALE</span>
                       </div>
                     ) : (
                       <div style={{marginBottom: '20px'}}>
                         <span className={classes.fractPic}><img src={fractPic} alt="0%" /></span>
-                        <span className={classes.fractPerc}>NOT</span> { /* ZUNOTE: if tokenized and onSale -> check for get fracts by atrkorkId! */ }
+                        <span className={classes.fractPerc}>NOT</span>
                         <span className={classes.fractText}>For Sale</span>
                       </div>
-                    )}
+                    )*/}
 
                     {  //ZUNOTE: only owner can see
                       this.state.userId === this.props.userState.userId ? (
@@ -447,7 +458,7 @@ class Product extends Component {
                             className={classes.fullBtn+' '+classes.btnorange+' '+classes.btnround} 
                         >Edit Artwork</Button>
                       </Link>
-                    ) : (  //ZUNOTE: not owner - missing link
+                    ) : (  //ZUNOTE: not owner - view in fimart button not reserve
                       <Link to={'?????'}>
                         <Button 
                           className={classes.fullBtn+' '+classes.btngreen+' '+classes.btnround} 

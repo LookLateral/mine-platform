@@ -64,7 +64,7 @@
 				"Timeout": "25",
 				"Code": {
 					"S3Bucket": "ll-platform-20190412100542-deployment",
-					"S3Key": "amplify-builds/fractLambda-1556110071-latest-build.zip"
+					"S3Key": "amplify-builds/fractLambda-1556116857-latest-build.zip"
 				}
 			}
 		},

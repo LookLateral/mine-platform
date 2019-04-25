@@ -7,13 +7,14 @@ import Button from "@material-ui/core/Button";
 //import {read} from './api-user.js'
 import {Redirect/*, Link*/} from 'react-router-dom'
 //import config from './../../config/config'
-
 //import {listByOwner} from '../shop/api-shop.js'
 //import {listByShop} from '../product/api-product.js'
-//import Fracts from './../fract/Fracts'
-
+import Fracts from './../fract/Fracts'
+import Txns from './../txn/Txns'
 //import Wallet from './../lightwallet/src/components/Alert'
 import Wallet from './../keys/Alert'
+import { API } from 'aws-amplify';
+
 
 const styles = theme => ({
   root: theme.mixins.gutters({
@@ -90,21 +91,68 @@ const styles = theme => ({
   tdRight: { width: '60%',height:30, paddingLeft:'3%', fontSize: '1.2em',},
 
   // tbl transactions
-  tdSmall: {width:10,},
+/*  tdSmall: {width:10,},
   tdHeader: {fontWeight:'bold',textAlign:'center', border: '1px solid #ddd', padding: '12px 0', fontSize:'1.2em',},
   tdText: {textAlign:'center', border: '1px solid #ddd', padding: '12px 0', fontSize:'1.2em',},
   tdRed: {backgroundColor:'red'},
   tdGreen: {backgroundColor:'green'},
   tdGrey: {backgroundColor:'rgb(0,0,0,0.05)'},
-
+*/
 })
 
 class MyFinancials extends Component {
+  constructor({ match }) {
+    super()
+    this.state = {
+      fracts: [],
+      txns: [],
+      error: '',
+    }
+    this.match = match
+    this.loadFracts = this.loadFracts.bind(this)
+    this.loadTxns = this.loadTxns.bind(this)
+  }
+
+  loadFracts = async () => {
+    if(isEmpty(this.state.fracts)) 
+      console.log('getting user fracts in my-financials');
+    const data = await API.get('fractAPI', '/fracts');
+    if (data.error) {
+      this.setState({ error: data.error })
+      alert('error loading fracts:\n' + JSON.stringify(data.error))
+    } else {
+      let myFracts = data.data.filter((fract, index) => {       
+        return fract.ownerId === this.props.userState.userId
+      });
+      this.setState({ fracts: myFracts })
+    }
+  }
+
+  loadTxns = async () => {
+    if(isEmpty(this.state.txns)) 
+      console.log('getting user txns in my-financials');
+    const data = await API.get('txnAPI', '/txns');
+    if (data.error) {
+      this.setState({ error: data.error })
+      alert('error loading txns:\n' + JSON.stringify(data.error))
+    } else {
+      let myTxns = data.data.filter((txn, index) => {       
+        return txn.giverUserId === this.props.userState.userId || txn.receiverUserId === this.props.userState.userId
+      });
+      this.setState({ txns: myTxns })
+    }
+  }
   
     componentDidMount() {
         if (!this.props.userState.userLogged) {
           return <Redirect to='/signin'/>
         }
+        this.props.handleForceReload()
+    }
+
+    componentWillReceiveProps() {
+      this.loadFracts()
+      this.loadTxns()
     }
 
   render() {
@@ -167,8 +215,8 @@ class MyFinancials extends Component {
             <table style={{width:'84%'}}>
             <tbody>
                 <tr style={{width:'100%'}}>
-                    <td className={classes.tdRow0+' '+classes.tdTitle+' '+classes.tdLeft}>N° Artworks</td>
-                    <td className={classes.tdRow0+' '+classes.tdTitle+' '+classes.tdRight}>5</td>
+                    <td className={classes.tdRow0+' '+classes.tdTitle+' '+classes.tdLeft}>N° Fracts</td>
+                    <td className={classes.tdRow0+' '+classes.tdTitle+' '+classes.tdRight}>{ this.state.fracts.length}</td>
                 </tr>
                 <tr style={{width:'100%'}}>
                     <td className={classes.tdRow1+' '+classes.tdLeft}>Total USD value</td>
@@ -188,22 +236,17 @@ class MyFinancials extends Component {
         </div>
 
         <div className={classes.smallSpacer}></div>
-
-        {/* SIMONOTES: 
-        need to make this Fracts instead of products.
-        Products are artworks listed in MyArt, i'm the owner and can add provenance etc etc
-        in fract there will be 2 buttons: sell fracts you own, buy available fracts */}
         
-        {/* <Fracts products={this.state.products} searched={false}/> */}
-
-        fracts list here
+        <Fracts fracts={this.state.fracts} searched={true} userState={this.props.userState}/>
 
         <div className={classes.spacer}></div>
 
         <div className={classes.section}>
           <div className={classes.sectionTitle}>TRANSACTIONS HISTORY</div>
           
-          <div style={{width:'100%', float:'left'}}>
+          <Txns txns={this.state.txns} searched={true} userState={this.props.userState}/>
+          
+          {/*<div style={{width:'100%', float:'left'}}>
             <table style={{width:'100%'}}>
             <tbody>
             <tr style={{width:'100%'}}>
@@ -249,7 +292,7 @@ class MyFinancials extends Component {
                 </tr>
             </tbody>
             </table>
-          </div>
+          </div>*/}
 
         </div>
 
@@ -265,3 +308,11 @@ MyFinancials.propTypes = {
 }
 
 export default withStyles(styles)(MyFinancials)
+
+function isEmpty(obj) {
+  for(var key in obj) {
+      if(obj.hasOwnProperty(key))
+          return false;
+  }
+  return true;
+}

@@ -476,6 +476,7 @@ class AppRoutes extends React.Component {
 
             <Route exact path="/users/:userId/financials" render={(props) => <MyFinancials 
                                                               userState={this.state} 
+                                                              handleForceReload={this.handleForceReload} 
                                                               {...props} /> } />
             
             {/*<Route path="/shops/:shopId" component={Shop}/>
