@@ -5,7 +5,6 @@ import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent';
 import CardActions from '@material-ui/core/CardActions';
 import Button from '@material-ui/core/Button'
-//import FileUpload from '@material-ui/icons/FileUpload'
 //import auth from './../auth/auth-helper'
 import TextField from '@material-ui/core/TextField'
 import Checkbox from '@material-ui/core/Checkbox'
@@ -45,11 +44,31 @@ const styles = theme => ({
     margin: 'auto',
     marginBottom: theme.spacing.unit * 2
   },
-  input: {
+  /*input: {
     display: 'none'
   },
   filename:{
     marginLeft:'10px'
+  }*/
+  fileInput: {
+    display: 'none !important'
+  },
+  imgPreview: {
+    textAlign: 'center',
+    margin: '30px 15px',
+  },
+  image:  {
+    maxWidth: 300,
+  },
+  submitButton: {
+    padding: 12,
+    marginLeft: 10,
+    background: '#fff',
+    border: '4px solid #d3d3d3',
+    borderRadius: 15,
+    fontWeight: 700,
+    fontSize: '10pt',
+    cursor: 'pointer',
   }
 })
 
@@ -63,7 +82,9 @@ class NewProduct extends Component {
       name: null,
       artist: null,
       description: null,
-      images: [],
+      images: [],  
+      imagePreviewUrl: '',
+      imageName: '',
       category: null,
       price: 0,
       dimensions: null,
@@ -110,16 +131,25 @@ class NewProduct extends Component {
   }
 
   handleChange = name => event => {
-    //console.log('event:\n' + util.inspect(event))
-    //console.log('event.target.files:\n' + util.inspect(event.target.files[0]))
     const value = name === 'image'
       ? event.target.files[0]
       : event.target.value
     this.productData.set(name, value)
-    this.setState({ [name]: value }/*, 
-    function() {
-      console.log('state after handleChange:\n' + JSON.stringify(this.state.image.name)) 
-    }*/)
+    this.setState({ [name]: value })
+  }
+
+  _handleImageChange(e) {
+    e.preventDefault();
+    let reader = new FileReader();
+    let file = e.target.files[0];
+    reader.onloadend = () => {
+      this.setState({
+        images: file,
+        imagePreviewUrl: reader.result,
+        //imageName: this.state.id + '/pictures/' + file.name,
+      });
+    }
+    reader.readAsDataURL(file)
   }
 
   handleCheckbox = name => event => {
@@ -138,17 +168,19 @@ class NewProduct extends Component {
     }
 
     let uploadMetadata = {
-      image: this.state.images[0],
+      //image: this.state.images,
       location: this.state.location,
       value_usd: this.state.price,
       value_btc: null,
     }
-    // ZUNOTE: need to get image!!
-    //console.log('bigchain data:\nuploadDetails:\n' + JSON.stringify(uploadDetails) + '\nuploadMetadata:\n' + JSON.stringify(uploadMetadata));
+
     const txnUploadArtwork = writeArtworkToChain(uploadDetails, uploadMetadata)
-    this.setState({ id: txnUploadArtwork }, function () { 
-      
-      uploadFileInBucket(txnUploadArtwork + '/picture/name.txt', 'file here')
+    this.setState({ 
+      id: txnUploadArtwork, 
+      imageName: txnUploadArtwork + '/pictures/' + this.state.images.name 
+    
+    }, function () {  
+      uploadFileInBucket(this.state.imageName, this.state.images)
       this.createTransaction();     
     })
   }
@@ -190,45 +222,54 @@ class NewProduct extends Component {
     if(this.state.name===null || this.state.artist===null){
       alert('Please complete all required fields'); 
       return false;
-    } else {              
+    } else {   
+      
+      uploadFileInBucket(this.state.imageName, this.state.images);
+
+      const body =  {
+        id: this.state.id,
+        userId: this.props.userState.userId,
+        tokenizationId: this.state.tokenizationId || null,
+        name: this.state.name,
+        artist: this.state.artist,
+        description: this.state.description,
+        imageName: this.state.id + '/pictures/' + this.state.images.name,
+        images: this.state.images,
+        //imagePreviewUrl: this.state.imagePreviewUrl,
+        category: this.state.category,
+        price: this.state.price,
+        dimensions: this.state.dimensions,
+        year: this.state.year,
+        location: this.state.location,      
+        creationDate: Date('Y-m-d'),     
+        viewable: this.state.viewable,
+
+        reqTag: this.state.reqTag,
+        reqTagDate: this.state.reqTagDate,
+        tagSent: this.state.tagSent,
+        tagSentDate: this.state.tagSentDate,
+        reqVal: this.state.reqVal,
+        reqValDate: this.state.reqValDate,
+        tagged: this.state.tagged,
+        tagDate: this.state.tagDate,
+
+        reqTokenization: this.state.reqTokenization,
+        reqTokenizationDate: this.state.reqTokenizationDate,
+        tokenqty: this.state.tokenqty,
+        tokenKept: this.state.tokenKept, 
+        tokenForSale: this.state.tokenForSale,
+        tokenName: this.state.tokenName, 
+        tokenSuggestedValue: this.state.tokenSuggestedValue,
+        tokenValue: this.state.tokenValue,
+        tokenized: this.state.tokenized,
+        tokenizationDate: this.state.tokenizationDate,
+        buyback: this.state.buyback   
+      }
+
+      console.log('bodyart\n' + JSON.stringify(body));
+
       const data = await API.post('artworksAPI', '/artworks/', {
-        body: {
-          id: this.state.id,
-          userId: this.props.userState.userId,
-          tokenizationId: this.state.tokenizationId || null,
-          name: this.state.name,
-          artist: this.state.artist,
-          description: this.state.description,
-          images: [],
-          category: this.state.category,
-          price: this.state.price,
-          dimensions: this.state.dimensions,
-          year: this.state.year,
-          location: this.state.location,      
-          creationDate: Date('Y-m-d'),     
-          viewable: this.state.viewable,
-
-          reqTag: this.state.reqTag,
-          reqTagDate: this.state.reqTagDate,
-          tagSent: this.state.tagSent,
-          tagSentDate: this.state.tagSentDate,
-          reqVal: this.state.reqVal,
-          reqValDate: this.state.reqValDate,
-          tagged: this.state.tagged,
-          tagDate: this.state.tagDate,
-
-          reqTokenization: this.state.reqTokenization,
-          reqTokenizationDate: this.state.reqTokenizationDate,
-          tokenqty: this.state.tokenqty,
-          tokenKept: this.state.tokenKept, 
-          tokenForSale: this.state.tokenForSale,
-          tokenName: this.state.tokenName, 
-          tokenSuggestedValue: this.state.tokenSuggestedValue,
-          tokenValue: this.state.tokenValue,
-          tokenized: this.state.tokenized,
-          tokenizationDate: this.state.tokenizationDate,
-          buyback: this.state.buyback   
-        }
+        body: body
       });   
       
       if (data.error) {
@@ -243,24 +284,56 @@ class NewProduct extends Component {
   }
 
   render() {
+    
+    const {classes} = this.props
+
+    let {imagePreviewUrl} = this.state;
+    let $imagePreview = null;
+    if (imagePreviewUrl) {
+      $imagePreview = (<img src={imagePreviewUrl} className={classes.image} />);
+    } else {
+      $imagePreview = (<div className="previewText">Please select an image</div>);
+    }
+
     if (this.state.redirect) {
       return (<Redirect to={"/users/" + this.props.userState.userId + "/" + this.props.userState.galleryId}/>)
     }
-    const {classes} = this.props
-    //if(this.state.image) console.log('this.state.image:\n' + JSON.stringify(this.state.image))
+    
     return (<div>
       <Card className={classes.card}>
         <CardContent>
           <Typography type="headline" component="h2" className={classes.title}>
             New Artwork
           </Typography><br/>
+          
+          {/*
           <input accept="image/*" onChange={this.handleChange('image')} className={classes.input} id="icon-button-file" type="file" />
           <label htmlFor="icon-button-file">
             <Button variant="contained" color="secondary" component="span">
               Upload Picture
-              {/*<FileUpload/>*/}
             </Button>
           </label> <span className={classes.filename}>{ this.state.image ? this.state.image.name : ''}</span><br/>
+          */}
+          <div className="previewComponent">
+            <form onSubmit={(e)=>this._handleSubmitImage(e)}>
+              <input className={classes.fileInput}
+                id="contained-button-imagePreview" 
+                type="file" 
+                onChange={(e)=>this._handleImageChange(e)} />
+              <label htmlFor="contained-button-imagePreview">
+              <Button className={classes.submitButton} 
+                variant="contained"
+                component="span"
+                onChange={(e)=>this._handleImageChange(e)}>
+                Change Image
+                </Button>
+                </label>
+            </form>
+            <div className={classes.imgPreview}>
+              {$imagePreview}
+            </div>
+          </div>
+
           <TextField 
                 id="name" 
                 label="Name"

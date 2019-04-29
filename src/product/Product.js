@@ -7,14 +7,15 @@ import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent';
 import CardMedia from '@material-ui/core/CardMedia';
 import Grid from '@material-ui/core/Grid'
-import { API } from 'aws-amplify';
+import { API, Storage } from 'aws-amplify';
 //import {read, listRelated} from './api-product.js'
 //import Suggestions from './../product/Suggestions'
 //import AddToCart from './../cart/AddToCart'
 import BackgroundLeft from '../assets/images/image-home-sx.jpg';
-import fractPic from '../assets/images/fractPic.png';
+//import fractPic from '../assets/images/fractPic.png';
 import EmptyPic from '../assets/images/empty-pic.jpg';
 import { initTokanization } from './../bigchain/TokenizeArtwork'
+
 
 
 const styles = theme => ({
@@ -163,7 +164,9 @@ class Product extends Component {
       name: null,
       artist: null,
       description: null,
-      images: [],
+      images: [],  
+      //imagePreviewUrl: '',
+      imageName: '',
       category: null,
       price: 0,
       dimensions: null,
@@ -195,7 +198,9 @@ class Product extends Component {
       buyback: false,
 
       suggestions: [],
-      suggestionTitle: 'Related Products'
+      suggestionTitle: 'Related Products',
+
+      renderImage: EmptyPic,
     }
     this.match = match
     this.loadProduct = this.loadProduct.bind(this)
@@ -207,6 +212,13 @@ class Product extends Component {
       this.setState({ error: data.error })
       console.log('error loading artwork:\n' + JSON.stringify(data.error))
     } else {
+
+      Storage.get(data[0].imageName)
+        .then( result => {
+          this.setState({ renderImage: result })
+          alert(result)
+        })   
+
       this.setState({ 
         id: data[0].id,
         userId: data[0].userId,
@@ -214,7 +226,9 @@ class Product extends Component {
         name: data[0].name,
         artist: data[0].artist,
         description: data[0].description,
-        images: [],
+        imageName: data[0].imageName,
+        images: data[0].images,
+        //imagePreviewUrl: data[0].imagePreviewUrl,
         category: data[0].category,
         price: data[0].price,
         dimensions: data[0].dimensions,
@@ -243,7 +257,7 @@ class Product extends Component {
         tokenValue: data[0].tokenValue || null,
         tokenized: data[0].tokenized || false,
         tokenizationDate: data[0].tokenizationDate || null,
-        buyback: data[0].buyback || false  
+        buyback: data[0].buyback || false,
       })
     }
   }
@@ -357,7 +371,9 @@ class Product extends Component {
           name: this.state.name,
           artist: this.state.artist,
           description: this.state.description,
-          images: [],
+          imageName: this.state.imageName,
+          images: this.state.images,
+          //imagePreviewUrl: this.state.imagePreviewUrl,
           category: this.state.category,
           price: this.state.price,
           dimensions: this.state.dimensions,
@@ -403,7 +419,6 @@ class Product extends Component {
     if (!this.props.userState.userLogged) {
         return <Redirect to='/signin'/>
     }
-    //this.loadProduct(this.match.params.productId)
     this.props.handleForceReload()
   }
 
@@ -412,10 +427,7 @@ class Product extends Component {
   }
 
   render() {
-    /*const imageUrl = this.state.product._id
-          ? `/api/product/image/${this.state.product._id}?${new Date().getTime()}`
-          : '/api/product/defaultphoto'*/
-    const imageUrl = EmptyPic // ZUNOTE: need to fix
+
     const {classes} = this.props
 
     return (
@@ -427,8 +439,9 @@ class Product extends Component {
                 <div className={classes.flex}>
                   <CardMedia
                     className={classes.media}
-                    image={imageUrl}
+                    image={ this.state.renderImage }
                     title={this.state.name}
+                    alt={this.state.name}
                   />
                   <div type="subheading" className={classes.subheading}>
                     <div className={classes.artist}>{this.state.artist}</div><br/>

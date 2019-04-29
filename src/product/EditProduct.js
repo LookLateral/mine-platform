@@ -1,23 +1,23 @@
 import React, {Component} from 'react'
 import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/core/styles'
 import {Link, Redirect} from 'react-router-dom'
 
 import Card from '@material-ui/core/Card'
-import CardContent from '@material-ui/core/CardContent';
-import CardActions from '@material-ui/core/CardActions';
+import CardContent from '@material-ui/core/CardContent'
+import CardActions from '@material-ui/core/CardActions'
 import Button from '@material-ui/core/Button'
-//import FileUpload from 'material-ui-icons/FileUpload'
 import TextField from '@material-ui/core/TextField'
 import Checkbox from '@material-ui/core/Checkbox'
 import FormControlLabel from '@material-ui/core/FormControlLabel'
 import Typography from '@material-ui/core/Typography'
 import Icon from '@material-ui/core/Icon'
-import Avatar from '@material-ui/core/Avatar'
+//import Avatar from '@material-ui/core/Avatar'
 //import {read, update} from './api-product.js'
 //import auth from './../auth/auth-helper'
-import { API } from 'aws-amplify';
-import EmptyPic from '../assets/images/empty-pic.jpg';
+import { API, Storage } from 'aws-amplify'
+import { uploadFileInBucket, /*getFileInBucket,*/ removeFileInBucket } from './../bucket/manageBuckets'
+//import EmptyPic from '../assets/images/empty-pic.jpg';
 
 
 const styles = theme => ({
@@ -46,7 +46,7 @@ const styles = theme => ({
     margin: 'auto',
     marginBottom: theme.spacing.unit * 2
   },
-  bigAvatar: {
+  /*bigAvatar: {
     width: 60,
     height: 60,
     margin: 'auto'
@@ -56,6 +56,27 @@ const styles = theme => ({
   },
   filename:{
     marginLeft:'10px'
+  },*/
+  
+  fileInput: {
+    display: 'none !important'
+  },
+  imgPreview: {
+    textAlign: 'center',
+    margin: '30px 15px',
+  },
+  image:  {
+    maxWidth: 300,
+  },
+  submitButton: {
+    padding: 12,
+    marginLeft: 10,
+    background: '#fff',
+    border: '4px solid #d3d3d3',
+    borderRadius: 15,
+    fontWeight: 700,
+    fontSize: '10pt',
+    cursor: 'pointer',
   }
 })
 
@@ -69,7 +90,9 @@ class EditProduct extends Component {
       name: null,
       artist: null,
       description: null,
-      images: [],
+      images: [],  
+      imagePreviewUrl: '',
+      imageName: '',
       category: null,
       price: 0,
       dimensions: null,
@@ -100,8 +123,11 @@ class EditProduct extends Component {
       tokenizationDate: null,
       buyback: false,
 
+      renderImage: '',
+      oldImageName: '',
+      needToRenewImage: false,
       redirect: false,
-      error: ''
+      error: '',
     }
     this.match = match
   }
@@ -111,8 +137,6 @@ class EditProduct extends Component {
     if (!this.props.userState.userLogged) {
       return <Redirect to='/signin'/>
     }
-    //this.loadProduct(this.match.params.productId)
-    //this.forceUpdate()
     this.props.handleForceReload()
   }
 
@@ -128,13 +152,27 @@ class EditProduct extends Component {
     this.setState({ [name]: value })
   }
 
+  _handleImageChange(e) {
+    e.preventDefault();
+    let reader = new FileReader();
+    let file = e.target.files[0];
+    reader.onloadend = () => {
+      this.setState({
+        images: file,
+        imagePreviewUrl: reader.result,
+        imageName: this.state.id + '/pictures/' + file.name,
+        needToRenewImage: true,
+      });
+    }
+    reader.readAsDataURL(file)
+  }
+
   handleCheckbox = name => event => {
     if(name === 'viewable')  this.setState({ viewable: !this.state.viewable });
   }
 
   handleUpdateArtworkSubmit = (e) => {
     e.preventDefault();
-
     // SIMONOTES: need to update old metadata in txn???
     console.log('updating artwork');
     this.updateArtwork();
@@ -147,6 +185,12 @@ class EditProduct extends Component {
       this.setState({ error: data.error })
       alert('error loading artwork:\n' + JSON.stringify(data.error))
     } else {
+
+      Storage.get(data[0].imageName)
+      .then( result => {
+        this.setState({ renderImage: result })
+      })   
+
       this.setState({ 
         id: data[0].id,
         userId: data[0].userId,
@@ -154,7 +198,9 @@ class EditProduct extends Component {
         name: data[0].name,
         artist: data[0].artist,
         description: data[0].description,
-        images: [],
+        imageName: data[0].imageName,
+        images: data[0].images,
+        //imagePreviewUrl: data[0].imagePreviewUrl,
         category: data[0].category,
         price: data[0].price,
         dimensions: data[0].dimensions,
@@ -183,7 +229,9 @@ class EditProduct extends Component {
         tokenValue: data[0].tokenValue || null,
         tokenized: data[0].tokenized || false,
         tokenizationDate: data[0].tokenizationDate || null,
-        buyback: data[0].buyback || false   
+        buyback: data[0].buyback || false,
+
+        oldImageName: data[0].imageName,  
       })
     }
   }
@@ -192,7 +240,13 @@ class EditProduct extends Component {
     if(this.state.name===null || this.state.artist===null){
       alert('Please complete all required fields'); 
       return false;
-    } else {       
+    } else {   
+      if(this.state.needToRenewImage){
+        removeFileInBucket(this.state.oldImageName);
+        uploadFileInBucket(this.state.imageName, this.state.images);
+      }
+      
+
       const data = await API.post('artworksAPI', '/artworks/', {
         body: {
           id: this.state.id,
@@ -201,7 +255,9 @@ class EditProduct extends Component {
           name: this.state.name,
           artist: this.state.artist,
           description: this.state.description,
-          images: [],
+          imageName: this.state.imageName,
+          images: this.state.images,
+          //imagePreviewUrl: this.state.imagePreviewUrl,
           category: this.state.category,
           price: this.state.price,
           dimensions: this.state.dimensions,
@@ -244,29 +300,58 @@ class EditProduct extends Component {
   }
 
   render() {
-    /*const imageUrl = this.state.id
-          ? `/api/product/image/${this.state.id}?${new Date().getTime()}`
-          : '/api/product/defaultphoto'*/
-    const imageUrl = EmptyPic // ZUNOTE: need to fix
+    const {classes} = this.props
+
+
+    let {imagePreviewUrl} = this.state;
+    let $imagePreview = null;
+    if (imagePreviewUrl) {
+      $imagePreview = (<img src={imagePreviewUrl} className={classes.image} />);
+    } else if(this.state.renderImage){
+      $imagePreview = (<img src={this.state.renderImage} className={classes.image} />);
+    } else {
+      $imagePreview = (<div className="previewText">Please select an image</div>);
+    }
 
     if (this.state.redirect) {
       return (<Redirect to={'/product/' + this.state.id }/>)
     }
-    const {classes} = this.props
+    
     return (<div>
       <Card className={classes.card}>
         <CardContent>
           <Typography type="headline" component="h2" className={classes.title}>
             Edit Product
           </Typography><br/>
-          <Avatar src={imageUrl} className={classes.bigAvatar}/><br/>
+          
+          {/*<Avatar src={imageUrl} className={classes.bigAvatar}/><br/>
           <input accept="image/*" onChange={this.handleChange('image')} className={classes.input} id="icon-button-file" type="file" />
           <label htmlFor="icon-button-file">
             <Button variant="contained" color="secondary" component="span">
               Change Image
-              {/*<FileUpload/>*/}
             </Button>
-          </label> <span className={classes.filename}>{this.state.image ? this.state.image.name : ''}</span><br/>
+          </label> <span className={classes.filename}>{this.state.image ? this.state.image.name : ''}</span><br/>*/}
+
+          <div className="previewComponent">
+            <form onSubmit={(e)=>this._handleSubmitImage(e)}>
+              <input className={classes.fileInput}
+                id="contained-button-imagePreview" 
+                type="file" 
+                onChange={(e)=>this._handleImageChange(e)} />
+              <label htmlFor="contained-button-imagePreview">
+              <Button className={classes.submitButton} 
+                variant="contained"
+                component="span"
+                onChange={(e)=>this._handleImageChange(e)}>
+                Change Image
+                </Button>
+                </label>
+            </form>
+            <div className={classes.imgPreview}>
+              {$imagePreview}
+            </div>
+          </div>
+
           <TextField 
                 id="name" 
                 label="Name" 

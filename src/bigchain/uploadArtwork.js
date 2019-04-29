@@ -18,7 +18,7 @@ function writeArtworkToChain(uploadDetails, uploadMetadata) {
         {
             datetime: new Date().toString(),
             value: {
-                image: uploadMetadata.image,
+                //image: uploadMetadata.image,
                 location: uploadMetadata.location,
                 //dimensions: uploadMetadata.dimensions,
                 value_usd: uploadMetadata.value_usd,
@@ -29,11 +29,10 @@ function writeArtworkToChain(uploadDetails, uploadMetadata) {
             BigchainDB.Transaction.makeEd25519Condition(alice.publicKey))],
         alice.publicKey
     )
-    const txSigned = BigchainDB.Transaction.signTransaction(txCreatePaint,
-        alice.privateKey)
+    const txSigned = BigchainDB.Transaction.signTransaction(txCreatePaint, alice.privateKey)
 
     conn.postTransactionCommit(txSigned)
-        /*.then(res => {
+        /*.then(res => {            
             document.body.innerHTML += '<h3>Transaction created</h3>';
             document.body.innerHTML += txSigned.id
             

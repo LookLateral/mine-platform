@@ -7,6 +7,7 @@ import Typography from '@material-ui/core/Typography'
 import Grid from '@material-ui/core/Grid'
 //import fractPic from '../assets/images/fractPic.png';
 import EmptyPic from '../assets/images/empty-pic.jpg';
+import { Storage } from 'aws-amplify';
 
 
 
@@ -146,6 +147,8 @@ class Products extends Component {
       
       // const imageUrl = '/api/product/image/'+product.id ZUNOTE: put it back in map! 
 
+
+
       return (  //change artwork layout: picture in floating
         <div className={classes.root}>
         {this.props.products.length > 0 ?
@@ -156,7 +159,7 @@ class Products extends Component {
                     <div className={classes.artworkRow} key={product.id}> 
                       <Grid item xs={6} sm={6} className={classes.boxDetail + ' ' + classes.boxLeft}>
                         {/* SIMONOTES: need to make the img verticalAlign:middle */}
-                        <Link to={"/product/"+product.id}><img className={classes.image} src={EmptyPic} alt={product.name} /></Link> 
+                        <Link to={"/product/"+product.id}><img className={classes.image} src={ Storage.get(product.imageName).then( result => { return result } )} alt={product.name} /></Link> 
                       </Grid>
                       
                       <Grid item xs={6} sm={6} className={classes.boxDetail + ' ' + classes.boxRight}>
